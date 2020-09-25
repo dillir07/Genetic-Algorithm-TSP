@@ -1,0 +1,28 @@
+{
+  "name": "genetic-algorithm-travelling-salesman",
+  "version": "1.0.0",
+  "description": "A Javascript implementation of Travelling salesman program using Genetic Algorithm",
+  "main": "index.html",
+  "scripts": {
+    "run": "npx tsc ./scripts/script.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dillir07/genetic-algorithm-travelling-salesman.git"
+  },
+  "keywords": [
+    "genetic",
+    "algorithm",
+    "travelling",
+    "salesman",
+    "tsp",
+    "javascript",
+    "typescript"
+  ],
+  "author": "Dilli Babu R <dillir07@gmail.com>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dillir07/genetic-algorithm-travelling-salesman/issues"
+  },
+  "homepage": "https://github.com/dillir07/genetic-algorithm-travelling-salesman#readme"
+}
