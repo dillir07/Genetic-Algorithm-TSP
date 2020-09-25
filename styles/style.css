@@ -1,0 +1,16 @@
+body {
+    margin: 0px;
+}
+
+#map {
+    border: solid black 5px;
+    width: 600px;
+    height: 600px;
+}
+
+#result {
+    border: solid gold 5px;
+    width: 600px;
+    height: 600px;
+    position: absolute;
+}
