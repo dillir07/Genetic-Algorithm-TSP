@@ -154,18 +154,17 @@ function calculateTravelDistance(chromosome: number[]): number {
 }
 
 
-function crossOver(parentOneChromosome: number[], parentTwoChromosome: number[]): number[] {
-    let offSpring: number[] = [];
-    let parentOneChromosomePart: number[] = [];
-    let parentTwoChromosomePart: number[] = [];
-    // let randomPoint: number = getRandomNumberInRange(0, parentTwoChromosome.length);
+function crossOver(parentOneChromosome, parentTwoChromosome) {
+
+    let offSpring = [];
+    let parentOneChromosomePart = [];
+
     parentOneChromosomePart = parentOneChromosome.slice(0, randomPointForCrossOver);
-    parentTwoChromosomePart = parentTwoChromosome.slice(randomPointForCrossOver, parentTwoChromosome.length);
-
-    console.log(parentOneChromosomePart, parentTwoChromosomePart);
-
-    offSpring = [].concat(parentOneChromosomePart, parentTwoChromosomePart);
-    return offSpring;
+    offSpring = parentTwoChromosome.slice();
+    parentOneChromosomePart.forEach(parentGene => {
+        offSpring.splice(offSpring.indexOf(parentGene), 1);
+    });
+    return offSpring.concat(parentOneChromosomePart);
 }
 
 function mutateChromosome(chromosome: number[]):number[] {

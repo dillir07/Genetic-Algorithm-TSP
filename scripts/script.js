@@ -111,15 +111,15 @@ function calculateTravelDistance(chromosome) {
     return travelDistance;
 }
 function crossOver(parentOneChromosome, parentTwoChromosome) {
+    debugger;
     var offSpring = [];
     var parentOneChromosomePart = [];
-    var parentTwoChromosomePart = [];
-    // let randomPoint: number = getRandomNumberInRange(0, parentTwoChromosome.length);
     parentOneChromosomePart = parentOneChromosome.slice(0, randomPointForCrossOver);
-    parentTwoChromosomePart = parentTwoChromosome.slice(randomPointForCrossOver, parentTwoChromosome.length);
-    console.log(parentOneChromosomePart, parentTwoChromosomePart);
-    offSpring = [].concat(parentOneChromosomePart, parentTwoChromosomePart);
-    return offSpring;
+    offSpring = parentTwoChromosome.slice();
+    parentOneChromosomePart.forEach(function (parentGene) {
+        offSpring.splice(offSpring.indexOf(parentGene), 1);
+    });
+    return offSpring.concat(parentOneChromosomePart);
 }
 function mutateChromosome(chromosome) {
     var mutatedChromosome = chromosome.slice();
