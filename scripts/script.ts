@@ -4,6 +4,8 @@ const getRandomNumberInRange = (min: number, max: number) => Math.floor((Math.ra
 let numberOfChromosomesCreated: number = 0;
 let cities: City[];
 let chromosomes = [];
+let initialPopulationSize: number = 10;
+let randomPointForCrossOver = Math.floor(numberOfCities / 2);
 /**
  * this interface is not working
  */
@@ -12,8 +14,8 @@ let chromosomes = [];
 //     y: number;
 // }
 
-interface ChromosomeInterface{
-    id:number,
+interface ChromosomeInterface {
+    id: number,
     route: number[];
     travelDistance: number;
     rgbColor: string;
@@ -54,14 +56,16 @@ class City implements CityInterface {
 function startUp() {
     console.log("startup");
     drawCities(cities);
-    let chromosome = generateChromosome(numberOfCities);
-    let strokeColor = `rgb(${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)})`;
-    chromosomes.push(new Chromosome(numberOfChromosomesCreated, chromosome, calculateTravelDistance(chromosome), strokeColor));
-    drawRoute(chromosome,strokeColor);
+    generateInitialPopulation(initialPopulationSize);
 }
 
-function initMap() {
-
+function generateInitialPopulation(size: number) {
+    for (let counter: number = 0; counter < size; counter++) {
+        let chromosome = generateChromosome(numberOfCities);
+        let strokeColor = `rgb(${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)})`;
+        chromosomes.push(new Chromosome(numberOfChromosomesCreated, chromosome, calculateTravelDistance(chromosome), strokeColor));
+        drawRoute(chromosome, strokeColor);
+    }
 }
 
 /**
@@ -87,33 +91,33 @@ let pencil = map.getContext("2d");
 function drawCities(listOfCities: City[]) {
     console.log("drawCities" + "is called");
     pencil.beginPath();
-    listOfCities.forEach((city) => pencil.fillRect(city.x, city.y, 5, 5/2));
+    listOfCities.forEach((city) => pencil.fillRect(city.x, city.y, 5, 5 / 2));
     pencil.stroke();
     pencil.closePath();
     return null; // typescript complains
 }
 
-function generateChromosome(numberOfCities):number[]{
-    let chromosome:Array<number> = [];
-    let switchPosition:number = 0;
+function generateChromosome(numberOfCities): number[] {
+    let chromosome: Array<number> = [];
+    let switchPosition: number = 0;
     let temp: number;
 
-    for (let counter = 0; counter < numberOfCities; counter++){
+    for (let counter = 0; counter < numberOfCities; counter++) {
         chromosome.push(counter);
     }
 
-    for (let counter = 0; counter < numberOfCities; counter++){
+    for (let counter = 0; counter < numberOfCities; counter++) {
         switchPosition = getRandomNumberInRange(0, numberOfCities);
         temp = chromosome[counter];
         chromosome[counter] = chromosome[switchPosition];
         chromosome[switchPosition] = temp;
     }
     numberOfChromosomesCreated++;
-    console.log('created chromosome # ' + numberOfChromosomesCreated + ": " + chromosome);
+    console.log('created chromosome #' + numberOfChromosomesCreated + ": " + chromosome);
     return chromosome;
 }
 
-function drawRoute(chromosome:number[], strokeColor:string) {
+function drawRoute(chromosome: number[], strokeColor: string) {
     pencil.beginPath();
     pencil.moveTo(cities[0].x, cities[0].y);
     chromosome.forEach(cityId => pencil.lineTo(cities[cityId].x, cities[cityId].y));
@@ -138,15 +142,43 @@ function getDistanceBetweenTwoCitiesByIds(city1Id: number, city2Id: number) {
     return Math.sqrt(Math.pow((city2.x - city1.x), 2) + Math.pow((city2.y - city1.y), 2));
 }
 
-function calculateTravelDistance(chromosome:number[]): number {
+function calculateTravelDistance(chromosome: number[]): number {
     let travelDistance: number = 0.0; //yes float here
-    for (let cityId = 0; cityId < chromosome.length - 1; cityId++){
-        let cityId1:number = chromosome[cityId];
-        let cityId2:number = chromosome[cityId + 1];
+    for (let cityId = 0; cityId < chromosome.length - 1; cityId++) {
+        let cityId1: number = chromosome[cityId];
+        let cityId2: number = chromosome[cityId + 1];
         travelDistance += getDistanceBetweenTwoCitiesByIds(cityId1, cityId2);
     }
-    console.log(`chromesome #${chromosome}'s travel distance: ${travelDistance}`);
+    console.log(`chromesome ${chromosome}'s travel distance: ${travelDistance}`);
     return travelDistance;
+}
+
+
+function crossOver(parentOneChromosome: number[], parentTwoChromosome: number[]): number[] {
+    let offSpring: number[] = [];
+    let parentOneChromosomePart: number[] = [];
+    let parentTwoChromosomePart: number[] = [];
+    // let randomPoint: number = getRandomNumberInRange(0, parentTwoChromosome.length);
+    parentOneChromosomePart = parentOneChromosome.slice(0, randomPointForCrossOver);
+    parentTwoChromosomePart = parentTwoChromosome.slice(randomPointForCrossOver, parentTwoChromosome.length);
+
+    console.log(parentOneChromosomePart, parentTwoChromosomePart);
+
+    offSpring = [].concat(parentOneChromosomePart, parentTwoChromosomePart);
+    return offSpring;
+}
+
+function mutateChromosome(chromosome: number[]):number[] {
+    let mutatedChromosome: number[] = chromosome.slice();
+    let temp: number = 0;
+    let switchPosition1: number = 0;
+    let switchPosition2: number = 0;
+    switchPosition1 = getRandomNumberInRange(0, mutatedChromosome.length);
+    switchPosition2 = getRandomNumberInRange(0, mutatedChromosome.length);
+    temp = mutatedChromosome[switchPosition1];
+    mutatedChromosome[switchPosition1] = mutatedChromosome[switchPosition2];
+    mutatedChromosome[switchPosition2] = temp;
+    return mutatedChromosome;
 }
 
 document.body.addEventListener("click", startUp);
