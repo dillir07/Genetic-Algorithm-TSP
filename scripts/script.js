@@ -4,6 +4,8 @@ var getRandomNumberInRange = function (min, max) { return Math.floor((Math.rando
 var numberOfChromosomesCreated = 0;
 var cities;
 var chromosomes = [];
+var initialPopulationSize = 10;
+var randomPointForCrossOver = Math.floor(numberOfCities / 2);
 var Chromosome = /** @class */ (function () {
     function Chromosome(id, route, travelDistance, rgbColor) {
         this.id = id;
@@ -24,12 +26,15 @@ var City = /** @class */ (function () {
 function startUp() {
     console.log("startup");
     drawCities(cities);
-    var chromosome = generateChromosome(numberOfCities);
-    var strokeColor = "rgb(" + getRandomNumberInRange(0, 255) + "," + getRandomNumberInRange(0, 255) + "," + getRandomNumberInRange(0, 255) + ")";
-    chromosomes.push(new Chromosome(numberOfChromosomesCreated, chromosome, calculateTravelDistance(chromosome), strokeColor));
-    drawRoute(chromosome, strokeColor);
+    generateInitialPopulation(initialPopulationSize);
 }
-function initMap() {
+function generateInitialPopulation(size) {
+    for (var counter = 0; counter < size; counter++) {
+        var chromosome = generateChromosome(numberOfCities);
+        var strokeColor = "rgb(" + getRandomNumberInRange(0, 255) + "," + getRandomNumberInRange(0, 255) + "," + getRandomNumberInRange(0, 255) + ")";
+        chromosomes.push(new Chromosome(numberOfChromosomesCreated, chromosome, calculateTravelDistance(chromosome), strokeColor));
+        drawRoute(chromosome, strokeColor);
+    }
 }
 /**
  * Generates given number of city objects and returns a list.
@@ -70,7 +75,7 @@ function generateChromosome(numberOfCities) {
         chromosome[switchPosition] = temp;
     }
     numberOfChromosomesCreated++;
-    console.log('created chromosome # ' + numberOfChromosomesCreated + ": " + chromosome);
+    console.log('created chromosome #' + numberOfChromosomesCreated + ": " + chromosome);
     return chromosome;
 }
 function drawRoute(chromosome, strokeColor) {
@@ -102,7 +107,30 @@ function calculateTravelDistance(chromosome) {
         var cityId2 = chromosome[cityId + 1];
         travelDistance += getDistanceBetweenTwoCitiesByIds(cityId1, cityId2);
     }
-    console.log("chromesome #" + chromosome + "'s travel distance: " + travelDistance);
+    console.log("chromesome " + chromosome + "'s travel distance: " + travelDistance);
     return travelDistance;
+}
+function crossOver(parentOneChromosome, parentTwoChromosome) {
+    var offSpring = [];
+    var parentOneChromosomePart = [];
+    var parentTwoChromosomePart = [];
+    // let randomPoint: number = getRandomNumberInRange(0, parentTwoChromosome.length);
+    parentOneChromosomePart = parentOneChromosome.slice(0, randomPointForCrossOver);
+    parentTwoChromosomePart = parentTwoChromosome.slice(randomPointForCrossOver, parentTwoChromosome.length);
+    console.log(parentOneChromosomePart, parentTwoChromosomePart);
+    offSpring = [].concat(parentOneChromosomePart, parentTwoChromosomePart);
+    return offSpring;
+}
+function mutateChromosome(chromosome) {
+    var mutatedChromosome = chromosome.slice();
+    var temp = 0;
+    var switchPosition1 = 0;
+    var switchPosition2 = 0;
+    switchPosition1 = getRandomNumberInRange(0, mutatedChromosome.length);
+    switchPosition2 = getRandomNumberInRange(0, mutatedChromosome.length);
+    temp = mutatedChromosome[switchPosition1];
+    mutatedChromosome[switchPosition1] = mutatedChromosome[switchPosition2];
+    mutatedChromosome[switchPosition2] = temp;
+    return mutatedChromosome;
 }
 document.body.addEventListener("click", startUp);
