@@ -29,17 +29,22 @@ function startUp() {
     console.log("startup");
     drawCities(cities);
     generateInitialPopulation(initialPopulationSize);
-    evaluatePopulation(chromosomes);
-    for (var counter = 0; counter < numberOfOffsprintsAllowed; counter++) {
-        var parentOneId = getRandomNumberInRange(0, chromosomes.length);
-        var parentTwoId = getRandomNumberInRange(0, chromosomes.length);
-        var offSpring = crossOver(chromosomes[parentOneId].route, chromosomes[parentTwoId].route);
-        offSpring = mutateChromosome(offSpring);
-        var strokeColor = "rgb(" + getRandomNumberInRange(0, 255) + "," + getRandomNumberInRange(0, 255) + "," + getRandomNumberInRange(0, 255) + ")";
-        chromosomes.push(new Chromosome(numberOfChromosomesCreated, offSpring, calculateTravelDistance(offSpring), strokeColor));
-        drawRoute(offSpring, strokeColor);
+    sortPopulationByFitness(chromosomes);
+    for (var generation = 0; generation < numberOfGenerationsAllowed; generation++) {
+        console.log("Generation", generation);
+        for (var counter = 0; counter < numberOfOffsprintsAllowed; counter++) {
+            var parentOneId = getRandomNumberInRange(0, chromosomes.length);
+            var parentTwoId = getRandomNumberInRange(0, chromosomes.length);
+            var offSpring = crossOver(chromosomes[parentOneId].route, chromosomes[parentTwoId].route);
+            offSpring = mutateChromosome(offSpring);
+            var strokeColor = "rgb(" + getRandomNumberInRange(0, 255) + "," + getRandomNumberInRange(0, 255) + "," + getRandomNumberInRange(0, 255) + ")";
+            chromosomes.push(new Chromosome(numberOfChromosomesCreated, offSpring, calculateTravelDistance(offSpring), strokeColor));
+            drawRoute(offSpring, strokeColor);
+        }
+        sortPopulationByFitness(chromosomes);
+        console.info("Best travel Distance", chromosomes[0].travelDistance, chromosomes[0].route);
+        console.error("Bad  travel Distance", chromosomes[chromosomes.length - 1].travelDistance, chromosomes[0].route);
     }
-    evaluatePopulation(chromosomes);
 }
 function generateInitialPopulation(size) {
     for (var counter = 0; counter < size; counter++) {
@@ -145,7 +150,7 @@ function mutateChromosome(chromosome) {
     mutatedChromosome[switchPosition2] = temp;
     return mutatedChromosome;
 }
-function evaluatePopulation(chromosomes) {
+function sortPopulationByFitness(chromosomes) {
     chromosomes.sort(function (cA, cB) { return cA.travelDistance - cB.travelDistance; });
 }
 document.body.addEventListener("click", startUp);

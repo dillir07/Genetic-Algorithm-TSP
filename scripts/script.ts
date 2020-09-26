@@ -60,16 +60,22 @@ function startUp() {
     drawCities(cities);
     generateInitialPopulation(initialPopulationSize);
     sortPopulationByFitness(chromosomes);
-    for (let counter: number = 0; counter < numberOfOffsprintsAllowed; counter++){
-        let parentOneId: number = getRandomNumberInRange(0, chromosomes.length);
-        let parentTwoId: number = getRandomNumberInRange(0, chromosomes.length);
-        let offSpring = crossOver(chromosomes[parentOneId].route, chromosomes[parentTwoId].route);
-        offSpring = mutateChromosome(offSpring);
-        let strokeColor = `rgb(${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)})`;
-        chromosomes.push(new Chromosome(numberOfChromosomesCreated, offSpring, calculateTravelDistance(offSpring), strokeColor));
-        drawRoute(offSpring, strokeColor);
+
+    for (let generation: number = 0; generation < numberOfGenerationsAllowed; generation++){
+        console.log("Generation", generation);
+        for (let counter: number = 0; counter < numberOfOffsprintsAllowed; counter++){
+            let parentOneId: number = getRandomNumberInRange(0, chromosomes.length);
+            let parentTwoId: number = getRandomNumberInRange(0, chromosomes.length);
+            let offSpring = crossOver(chromosomes[parentOneId].route, chromosomes[parentTwoId].route);
+            offSpring = mutateChromosome(offSpring);
+            let strokeColor = `rgb(${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)})`;
+            chromosomes.push(new Chromosome(numberOfChromosomesCreated, offSpring, calculateTravelDistance(offSpring), strokeColor));
+            drawRoute(offSpring, strokeColor);
+        }
+        sortPopulationByFitness(chromosomes);
+        console.info("Best travel Distance", chromosomes[0].travelDistance, chromosomes[0].route);
+        console.error("Bad  travel Distance", chromosomes[chromosomes.length-1].travelDistance, chromosomes[0].route);
     }
-    sortPopulationByFitness(chromosomes);
 }
 
 function generateInitialPopulation(size: number) {
