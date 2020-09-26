@@ -5,6 +5,8 @@ var numberOfChromosomesCreated = 0;
 var cities;
 var chromosomes = [];
 var initialPopulationSize = 10;
+var numberOfGenerationsAllowed = 10;
+var numberOfOffsprintsAllowed = 5;
 var randomPointForCrossOver = Math.floor(numberOfCities / 2);
 var Chromosome = /** @class */ (function () {
     function Chromosome(id, route, travelDistance, rgbColor) {
@@ -27,6 +29,17 @@ function startUp() {
     console.log("startup");
     drawCities(cities);
     generateInitialPopulation(initialPopulationSize);
+    evaluatePopulation(chromosomes);
+    for (var counter = 0; counter < numberOfOffsprintsAllowed; counter++) {
+        var parentOneId = getRandomNumberInRange(0, chromosomes.length);
+        var parentTwoId = getRandomNumberInRange(0, chromosomes.length);
+        var offSpring = crossOver(chromosomes[parentOneId].route, chromosomes[parentTwoId].route);
+        offSpring = mutateChromosome(offSpring);
+        var strokeColor = "rgb(" + getRandomNumberInRange(0, 255) + "," + getRandomNumberInRange(0, 255) + "," + getRandomNumberInRange(0, 255) + ")";
+        chromosomes.push(new Chromosome(numberOfChromosomesCreated, offSpring, calculateTravelDistance(offSpring), strokeColor));
+        drawRoute(offSpring, strokeColor);
+    }
+    evaluatePopulation(chromosomes);
 }
 function generateInitialPopulation(size) {
     for (var counter = 0; counter < size; counter++) {
@@ -111,7 +124,6 @@ function calculateTravelDistance(chromosome) {
     return travelDistance;
 }
 function crossOver(parentOneChromosome, parentTwoChromosome) {
-    debugger;
     var offSpring = [];
     var parentOneChromosomePart = [];
     parentOneChromosomePart = parentOneChromosome.slice(0, randomPointForCrossOver);
@@ -132,5 +144,8 @@ function mutateChromosome(chromosome) {
     mutatedChromosome[switchPosition1] = mutatedChromosome[switchPosition2];
     mutatedChromosome[switchPosition2] = temp;
     return mutatedChromosome;
+}
+function evaluatePopulation(chromosomes) {
+    chromosomes.sort(function (cA, cB) { return cA.travelDistance - cB.travelDistance; });
 }
 document.body.addEventListener("click", startUp);

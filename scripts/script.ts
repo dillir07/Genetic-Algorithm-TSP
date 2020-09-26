@@ -5,6 +5,8 @@ let numberOfChromosomesCreated: number = 0;
 let cities: City[];
 let chromosomes = [];
 let initialPopulationSize: number = 10;
+let numberOfGenerationsAllowed = 10;
+let numberOfOffsprintsAllowed = 5;
 let randomPointForCrossOver = Math.floor(numberOfCities / 2);
 /**
  * this interface is not working
@@ -57,6 +59,17 @@ function startUp() {
     console.log("startup");
     drawCities(cities);
     generateInitialPopulation(initialPopulationSize);
+    sortPopulationByFitness(chromosomes);
+    for (let counter: number = 0; counter < numberOfOffsprintsAllowed; counter++){
+        let parentOneId: number = getRandomNumberInRange(0, chromosomes.length);
+        let parentTwoId: number = getRandomNumberInRange(0, chromosomes.length);
+        let offSpring = crossOver(chromosomes[parentOneId].route, chromosomes[parentTwoId].route);
+        offSpring = mutateChromosome(offSpring);
+        let strokeColor = `rgb(${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)})`;
+        chromosomes.push(new Chromosome(numberOfChromosomesCreated, offSpring, calculateTravelDistance(offSpring), strokeColor));
+        drawRoute(offSpring, strokeColor);
+    }
+    sortPopulationByFitness(chromosomes);
 }
 
 function generateInitialPopulation(size: number) {
@@ -178,6 +191,10 @@ function mutateChromosome(chromosome: number[]):number[] {
     mutatedChromosome[switchPosition1] = mutatedChromosome[switchPosition2];
     mutatedChromosome[switchPosition2] = temp;
     return mutatedChromosome;
+}
+
+function sortPopulationByFitness(chromosomes: Chromosome[]):void{
+    chromosomes.sort((cA, cB) => cA.travelDistance - cB.travelDistance);
 }
 
 document.body.addEventListener("click", startUp);
