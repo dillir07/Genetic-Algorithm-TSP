@@ -1,20 +1,72 @@
-const numberOfCities: number = 5;
-const map = document.querySelector("canvas");
+const canvasMapElement = document.querySelector("canvas");
+const citiesLimitElement = <HTMLInputElement>document.getElementById("rangeCities");
+const initialPopulationLimitElement = <HTMLInputElement>document.getElementById("rangeInitialPopulationSize");
+const generationsLimitElement = <HTMLInputElement>document.getElementById("rangeGenerationsAllowed");
+const offspringsLimitElement = <HTMLInputElement>document.getElementById("rangeOffspringsAllowed");
+const crossoverLimitElement = <HTMLInputElement>document.getElementById("rangeCrossOverPoint");
+const evolveButtonElement = <HTMLInputElement>document.getElementById("btnEvolve");
+
+const citiesValueElement = <HTMLInputElement>document.getElementById("lblCitiesValue");
+const initialPopulationValueElement = <HTMLLabelElement>document.getElementById("lblInitialPopulationSizeValue");
+const generationsValueElement = <HTMLLabelElement>document.getElementById("lblGenerationsAllowedValue");
+const offspringsValueElement = <HTMLLabelElement>document.getElementById("lblOffspringsAllowedValue");
+const crossoverValueElement = <HTMLLabelElement>document.getElementById("lblCrossOverPointValue");
+
 const getRandomNumberInRange = (min: number, max: number) => Math.floor((Math.random() * max) + min);
-let numberOfChromosomesCreated: number = 0;
+let numberOfCities: number = 0;
+let numberOfChromosomesCreated: number = 0; // counter
 let cities: City[];
 let chromosomes = [];
-let initialPopulationSize: number = 10;
-let numberOfGenerationsAllowed = 10;
-let numberOfOffsprintsAllowed = 5;
+let initialPopulationSize: number = 0;
+let numberOfGenerationsAllowed = 0;
+let numberOfOffspringsAllowed = 5;
 let randomPointForCrossOver = Math.floor(numberOfCities / 2);
-/**
- * this interface is not working
- */
-// interface PointInterface {
-//     x: number;
-//     y: number;
-// }
+
+function updateCanvasMapSize():void {
+    canvasMapElement.width = window.innerWidth;
+    canvasMapElement.height = window.innerHeight;
+}
+
+function modifyNumberOfCities(): void{
+    let value = citiesLimitElement.valueAsNumber;
+    crossoverLimitElement.max = (value - 1).toString();
+    citiesValueElement.innerText = value.toString();
+    numberOfCities = value;
+}
+
+function modifyInitialPopulationSize(): void{
+    let value = initialPopulationLimitElement.valueAsNumber;
+    initialPopulationValueElement.innerText = value.toString();
+    initialPopulationSize = value;
+}
+
+function modifyGenerationSize(): void{
+    let value = generationsLimitElement.valueAsNumber;
+    generationsValueElement.innerText = value.toString();
+    numberOfGenerationsAllowed = value;
+}
+
+function modifyOffspringSize(): void{
+    let value = offspringsLimitElement.valueAsNumber;
+    offspringsValueElement.innerText = value.toString();
+    numberOfOffspringsAllowed = value;
+}
+
+function modifyCrossOverValue(): void{
+    let value = crossoverLimitElement.valueAsNumber;
+    crossoverValueElement.innerText = value.toString();
+    randomPointForCrossOver = value;
+}
+
+window.addEventListener("resize", updateCanvasMapSize);
+citiesLimitElement.addEventListener("change", modifyNumberOfCities);
+initialPopulationLimitElement.addEventListener("change", modifyInitialPopulationSize);
+generationsLimitElement.addEventListener("change", modifyGenerationSize);
+offspringsLimitElement.addEventListener("change", modifyOffspringSize);
+crossoverLimitElement.addEventListener("change", modifyCrossOverValue);
+evolveButtonElement.addEventListener("click", evolve);
+
+updateCanvasMapSize();
 
 interface ChromosomeInterface {
     id: number,
@@ -55,15 +107,16 @@ class City implements CityInterface {
     }
 }
 
-function startUp() {
-    console.log("startup");
+function evolve() {
+    console.log("evolve");
+    cities = generateCities(numberOfCities);
     drawCities(cities);
     generateInitialPopulation(initialPopulationSize);
     sortPopulationByFitness(chromosomes);
 
     for (let generation: number = 0; generation < numberOfGenerationsAllowed; generation++){
         console.log("Generation", generation);
-        for (let counter: number = 0; counter < numberOfOffsprintsAllowed; counter++){
+        for (let counter: number = 0; counter < numberOfOffspringsAllowed; counter++){
             let parentOneId: number = getRandomNumberInRange(0, chromosomes.length);
             let parentTwoId: number = getRandomNumberInRange(0, chromosomes.length);
             let offSpring = crossOver(chromosomes[parentOneId].route, chromosomes[parentTwoId].route);
@@ -94,8 +147,8 @@ function generateInitialPopulation(size: number) {
  */
 function generateCities(numberOfCities: number) {
     let cities: City[] = [];
-    let maxWidth: number = map.width;
-    let maxHeight: number = map.height;
+    let maxWidth: number = canvasMapElement.width;
+    let maxHeight: number = canvasMapElement.height;
     for (let counter: number = 0; counter < numberOfCities; counter++) {
         let city: City = new City(counter, getRandomNumberInRange(0, maxWidth),
             getRandomNumberInRange(0, maxHeight));
@@ -103,9 +156,8 @@ function generateCities(numberOfCities: number) {
     }
     return cities;
 }
-cities = generateCities(numberOfCities);
 
-let pencil = map.getContext("2d");
+let pencil = canvasMapElement.getContext("2d");
 
 function drawCities(listOfCities: City[]) {
     console.log("drawCities" + "is called");
@@ -158,6 +210,7 @@ function getDistanceBetweenTwoCities(city1: City, city2: City) {
 function getDistanceBetweenTwoCitiesByIds(city1Id: number, city2Id: number) {
     let city1: City = cities[city1Id];
     let city2: City = cities[city2Id];
+
     return Math.sqrt(Math.pow((city2.x - city1.x), 2) + Math.pow((city2.y - city1.y), 2));
 }
 
@@ -202,5 +255,3 @@ function mutateChromosome(chromosome: number[]):number[] {
 function sortPopulationByFitness(chromosomes: Chromosome[]):void{
     chromosomes.sort((cA, cB) => cA.travelDistance - cB.travelDistance);
 }
-
-document.body.addEventListener("click", startUp);

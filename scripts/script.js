@@ -1,13 +1,62 @@
-var numberOfCities = 5;
-var map = document.querySelector("canvas");
+var canvasMapElement = document.querySelector("canvas");
+var citiesLimitElement = document.getElementById("rangeCities");
+var initialPopulationLimitElement = document.getElementById("rangeInitialPopulationSize");
+var generationsLimitElement = document.getElementById("rangeGenerationsAllowed");
+var offspringsLimitElement = document.getElementById("rangeOffspringsAllowed");
+var crossoverLimitElement = document.getElementById("rangeCrossOverPoint");
+var evolveButtonElement = document.getElementById("btnEvolve");
+var citiesValueElement = document.getElementById("lblCitiesValue");
+var initialPopulationValueElement = document.getElementById("lblInitialPopulationSizeValue");
+var generationsValueElement = document.getElementById("lblGenerationsAllowedValue");
+var offspringsValueElement = document.getElementById("lblOffspringsAllowedValue");
+var crossoverValueElement = document.getElementById("lblCrossOverPointValue");
 var getRandomNumberInRange = function (min, max) { return Math.floor((Math.random() * max) + min); };
-var numberOfChromosomesCreated = 0;
+var numberOfCities = 0;
+var numberOfChromosomesCreated = 0; // counter
 var cities;
 var chromosomes = [];
-var initialPopulationSize = 10;
-var numberOfGenerationsAllowed = 10;
-var numberOfOffsprintsAllowed = 5;
+var initialPopulationSize = 0;
+var numberOfGenerationsAllowed = 0;
+var numberOfOffspringsAllowed = 5;
 var randomPointForCrossOver = Math.floor(numberOfCities / 2);
+function updateCanvasMapSize() {
+    canvasMapElement.width = window.innerWidth;
+    canvasMapElement.height = window.innerHeight;
+}
+function modifyNumberOfCities() {
+    var value = citiesLimitElement.valueAsNumber;
+    crossoverLimitElement.max = (value - 1).toString();
+    citiesValueElement.innerText = value.toString();
+    numberOfCities = value;
+}
+function modifyInitialPopulationSize() {
+    var value = initialPopulationLimitElement.valueAsNumber;
+    initialPopulationValueElement.innerText = value.toString();
+    initialPopulationSize = value;
+}
+function modifyGenerationSize() {
+    var value = generationsLimitElement.valueAsNumber;
+    generationsValueElement.innerText = value.toString();
+    numberOfGenerationsAllowed = value;
+}
+function modifyOffspringSize() {
+    var value = offspringsLimitElement.valueAsNumber;
+    offspringsValueElement.innerText = value.toString();
+    numberOfOffspringsAllowed = value;
+}
+function modifyCrossOverValue() {
+    var value = crossoverLimitElement.valueAsNumber;
+    crossoverValueElement.innerText = value.toString();
+    randomPointForCrossOver = value;
+}
+window.addEventListener("resize", updateCanvasMapSize);
+citiesLimitElement.addEventListener("change", modifyNumberOfCities);
+initialPopulationLimitElement.addEventListener("change", modifyInitialPopulationSize);
+generationsLimitElement.addEventListener("change", modifyGenerationSize);
+offspringsLimitElement.addEventListener("change", modifyOffspringSize);
+crossoverLimitElement.addEventListener("change", modifyCrossOverValue);
+evolveButtonElement.addEventListener("click", evolve);
+updateCanvasMapSize();
 var Chromosome = /** @class */ (function () {
     function Chromosome(id, route, travelDistance, rgbColor) {
         this.id = id;
@@ -25,14 +74,15 @@ var City = /** @class */ (function () {
     }
     return City;
 }());
-function startUp() {
-    console.log("startup");
+function evolve() {
+    console.log("evolve");
+    cities = generateCities(numberOfCities);
     drawCities(cities);
     generateInitialPopulation(initialPopulationSize);
     sortPopulationByFitness(chromosomes);
     for (var generation = 0; generation < numberOfGenerationsAllowed; generation++) {
         console.log("Generation", generation);
-        for (var counter = 0; counter < numberOfOffsprintsAllowed; counter++) {
+        for (var counter = 0; counter < numberOfOffspringsAllowed; counter++) {
             var parentOneId = getRandomNumberInRange(0, chromosomes.length);
             var parentTwoId = getRandomNumberInRange(0, chromosomes.length);
             var offSpring = crossOver(chromosomes[parentOneId].route, chromosomes[parentTwoId].route);
@@ -61,16 +111,15 @@ function generateInitialPopulation(size) {
  */
 function generateCities(numberOfCities) {
     var cities = [];
-    var maxWidth = map.width;
-    var maxHeight = map.height;
+    var maxWidth = canvasMapElement.width;
+    var maxHeight = canvasMapElement.height;
     for (var counter = 0; counter < numberOfCities; counter++) {
         var city = new City(counter, getRandomNumberInRange(0, maxWidth), getRandomNumberInRange(0, maxHeight));
         cities.push(city);
     }
     return cities;
 }
-cities = generateCities(numberOfCities);
-var pencil = map.getContext("2d");
+var pencil = canvasMapElement.getContext("2d");
 function drawCities(listOfCities) {
     console.log("drawCities" + "is called");
     pencil.beginPath();
@@ -116,6 +165,7 @@ function getDistanceBetweenTwoCities(city1, city2) {
 function getDistanceBetweenTwoCitiesByIds(city1Id, city2Id) {
     var city1 = cities[city1Id];
     var city2 = cities[city2Id];
+    console.log(city2Id, city2);
     return Math.sqrt(Math.pow((city2.x - city1.x), 2) + Math.pow((city2.y - city1.y), 2));
 }
 function calculateTravelDistance(chromosome) {
@@ -153,4 +203,3 @@ function mutateChromosome(chromosome) {
 function sortPopulationByFitness(chromosomes) {
     chromosomes.sort(function (cA, cB) { return cA.travelDistance - cB.travelDistance; });
 }
-document.body.addEventListener("click", startUp);
