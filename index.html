@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,9 +8,56 @@
     <link rel="stylesheet" href="styles/style.css">
     <script src="scripts/script.js" defer></script>
 </head>
+
 <body>
-    <div>
+    <div id="mapContainer">
         <canvas id="map"></canvas>
     </div>
+    <div id="joystickContainer">
+        <div id="joystick">
+            <div>
+                <label for="cities">Cities:</label>
+                <br> <br>
+                <input type="range" min="2" max="100" name="cities"
+                    id="rangeCities">
+                <label id="lblCitiesValue"></label>
+            </div>
+            <div>
+                <label for="initialPopulation">Initial Population:</label>
+                <br> <br>
+                <input type="range" min="5" max="100" name="initialPopulation"
+                    id="rangeInitialPopulationSize">
+                <label id="lblInitialPopulationSizeValue"></label>
+            </div>
+            <div>
+                <label for="generationsAllowed">No of Generations:</label>
+                <br> <br>
+                <input type="range" min="5" max="100" name="generationsAllowed"
+                    id="rangeGenerationsAllowed">
+                <label id="lblGenerationsAllowedValue"></label>
+            </div>
+            <div>
+                <label for="offsprings">No of offsprings per Generation:</label>
+                <br> <br>
+                <input type="range" min="2" max="100" name="offsprings"
+                    id="rangeOffspringsAllowed">
+                <label id="lblOffspringsAllowedValue"></label>
+            </div>
+            <div>
+                <label for="crossOverPoint">Crossoverpoint (maximum should be
+                    lessthan no. of Cities):</label>
+                <br> <br>
+                <input type="range" min="2" max="100" name="crossOverPoint"
+                    id="rangeCrossOverPoint">
+                <label id="lblCrossOverPointValue"></label>
+            </div>
+
+            <div>
+                <br>
+                <input type="button" value="Evolve" id="btnEvolve">
+            </div>
+        </div>
+    </div>
 </body>
+
 </html>
