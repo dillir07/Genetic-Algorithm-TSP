@@ -27,13 +27,31 @@ body {
   padding: 15px;
 }
 
+#lblBestTravelDistance {
+  color: green;
+  font-weight: bolder;
+  font-size: larger;
+}
+
+#lblWorstTravelDistance {
+  color: red;
+  font-weight: bolder;
+  font-size: larger;
+}
+
 #btnEvolve {
   background: #2196f3;
   color:white;
-  font-size: larger;
+  font-size: xx-large;
   border-radius: 5px;
   border: none;
 }
+
+#checkboxRandomCities {
+  height: 9px;
+  width: 9px;
+}
+
 input[type=range] {
     -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
     width: 25%;/*  Specific width is required for Firefox. */
