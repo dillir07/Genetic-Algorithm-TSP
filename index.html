@@ -16,42 +16,52 @@
     <div id="joystickContainer">
         <div id="joystick">
             <div>
-                <label for="cities">Cities:</label>
-                <br> <br>
-                <input type="range" min="2" max="100" name="cities"
+                <label for="cities">Cities:</label><label
+                    id="lblCitiesValue"></label>
+                <br>
+                <input type="range" min="3" max="100" name="cities"
                     id="rangeCities">
-                <input type="checkbox" name="randomCities" checked="checked"
+                <br>
+                <label for="randomCities">Use Random Cities: </label> <input
+                    type="checkbox" name="randomCities" checked="checked"
                     id="checkboxRandomCities">
-                <label id="lblCitiesValue"></label>
+                <!-- <br>
+                <label for="staticCities">Use Same Cities: </label> <input
+                    type="checkbox" name="staticCities" checked="checked"
+                    id="checkboxStaticCities"> -->
             </div>
             <div>
-                <label for="initialPopulation">Initial Population:</label>
-                <br> <br>
+                <label for="initialPopulation">Initial Population:</label><label
+                    id="lblInitialPopulationSizeValue"></label>
+                <br>
                 <input type="range" min="5" max="100" name="initialPopulation"
                     id="rangeInitialPopulationSize">
-                <label id="lblInitialPopulationSizeValue"></label>
+
             </div>
             <div>
-                <label for="generationsAllowed">No of Generations:</label>
-                <br> <br>
+                <label for="generationsAllowed">No of Generations:</label><label
+                    id="lblGenerationsAllowedValue"></label>
+                <br>
                 <input type="range" min="5" max="100" name="generationsAllowed"
                     id="rangeGenerationsAllowed">
-                <label id="lblGenerationsAllowedValue"></label>
+
             </div>
             <div>
-                <label for="offsprings">No of offsprings per Generation:</label>
-                <br> <br>
+                <label for="offsprings">No of offsprings per
+                    Generation:</label><label
+                    id="lblOffspringsAllowedValue"></label>
+                <br>
                 <input type="range" min="2" max="100" name="offsprings"
                     id="rangeOffspringsAllowed">
-                <label id="lblOffspringsAllowedValue"></label>
+
             </div>
             <div>
-                <label for="crossOverPoint">Crossoverpoint (maximum should be
-                    lessthan no. of Cities):</label>
-                <br> <br>
+                <label for="crossOverPoint">Crossoverpoint: </label><label
+                    id="lblCrossOverPointValue"></label>
+                <br>
                 <input type="range" min="2" max="100" name="crossOverPoint"
                     id="rangeCrossOverPoint">
-                <label id="lblCrossOverPointValue"></label>
+
             </div>
 
             <div>
