@@ -6,53 +6,58 @@ const offspringsLimitElement = <HTMLInputElement>document.getElementById("rangeO
 const crossoverLimitElement = <HTMLInputElement>document.getElementById("rangeCrossOverPoint");
 const evolveButtonElement = <HTMLInputElement>document.getElementById("btnEvolve");
 
+const randomCitiesCheckBoxElement = <HTMLInputElement>document.getElementById("checkboxRandomCities");
+
 const citiesValueElement = <HTMLInputElement>document.getElementById("lblCitiesValue");
 const initialPopulationValueElement = <HTMLLabelElement>document.getElementById("lblInitialPopulationSizeValue");
 const generationsValueElement = <HTMLLabelElement>document.getElementById("lblGenerationsAllowedValue");
 const offspringsValueElement = <HTMLLabelElement>document.getElementById("lblOffspringsAllowedValue");
 const crossoverValueElement = <HTMLLabelElement>document.getElementById("lblCrossOverPointValue");
 
+const bestTravelDistaceElement = <HTMLLabelElement>document.getElementById("lblBestTravelDistance");
+const worstTravelDistanceElement = <HTMLLabelElement>document.getElementById("lblWorstTravelDistance");
+let bodyClickListener: any;
 const getRandomNumberInRange = (min: number, max: number) => Math.floor((Math.random() * max) + min);
-let numberOfCities: number = 0;
-let numberOfChromosomesCreated: number = 0; // counter
-let cities: City[];
+let numberOfCities: number = 5;
+let numberOfChromosomesCreated: number = 5; // counter
+let cities: City[] = [];
 let chromosomes = [];
-let initialPopulationSize: number = 0;
-let numberOfGenerationsAllowed = 0;
+let initialPopulationSize: number = 5;
+let numberOfGenerationsAllowed = 5;
 let numberOfOffspringsAllowed = 5;
 let randomPointForCrossOver = Math.floor(numberOfCities / 2);
 
-function updateCanvasMapSize():void {
+function updateCanvasMapSize(): void {
     canvasMapElement.width = window.innerWidth;
     canvasMapElement.height = window.innerHeight;
 }
 
-function modifyNumberOfCities(): void{
+function modifyNumberOfCities(): void {
     let value = citiesLimitElement.valueAsNumber;
     crossoverLimitElement.max = (value - 1).toString();
     citiesValueElement.innerText = value.toString();
     numberOfCities = value;
 }
 
-function modifyInitialPopulationSize(): void{
+function modifyInitialPopulationSize(): void {
     let value = initialPopulationLimitElement.valueAsNumber;
     initialPopulationValueElement.innerText = value.toString();
     initialPopulationSize = value;
 }
 
-function modifyGenerationSize(): void{
+function modifyGenerationSize(): void {
     let value = generationsLimitElement.valueAsNumber;
     generationsValueElement.innerText = value.toString();
     numberOfGenerationsAllowed = value;
 }
 
-function modifyOffspringSize(): void{
+function modifyOffspringSize(): void {
     let value = offspringsLimitElement.valueAsNumber;
     offspringsValueElement.innerText = value.toString();
     numberOfOffspringsAllowed = value;
 }
 
-function modifyCrossOverValue(): void{
+function modifyCrossOverValue(): void {
     let value = crossoverLimitElement.valueAsNumber;
     crossoverValueElement.innerText = value.toString();
     randomPointForCrossOver = value;
@@ -107,36 +112,86 @@ class City implements CityInterface {
     }
 }
 
+function addClickLocationToCity(event) {
+    console.log(event);
+    if (cities.length >= numberOfCities) {
+        document.body.removeEventListener("click", bodyClickListener);
+        window.alert(numberOfCities + " cities are added");
+
+        drawCities(cities);
+        generateInitialPopulation(initialPopulationSize);
+        sortPopulationByFitness(chromosomes);
+
+        for (let generation: number = 0; generation < numberOfGenerationsAllowed; generation++) {
+            console.log("Generation", generation);
+            for (let counter: number = 0; counter < numberOfOffspringsAllowed; counter++) {
+                let parentOneId: number = getRandomNumberInRange(0, chromosomes.length);
+                let parentTwoId: number = getRandomNumberInRange(0, chromosomes.length);
+                let offSpring = crossOver(chromosomes[parentOneId].route, chromosomes[parentTwoId].route);
+                offSpring = mutateChromosome(offSpring);
+                let strokeColor = `rgb(${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)})`;
+                chromosomes.push(new Chromosome(numberOfChromosomesCreated, offSpring, calculateTravelDistance(offSpring), strokeColor));
+                // drawRoute(offSpring, strokeColor, 1);
+            }
+            sortPopulationByFitness(chromosomes);
+            drawRoute(chromosomes[0].route, "green", 5);
+            drawRoute(chromosomes[chromosomes.length - 1].route, "red", 2);
+            bestTravelDistaceElement.innerText = "Best travel Distance:" + chromosomes[0].travelDistance;
+            worstTravelDistanceElement.innerText = "Bad  travel Distance:" + chromosomes[chromosomes.length - 1].travelDistance;
+        }
+
+    }
+    if (event.target.id == "map") {
+        cities.push(new City(cities.length + 1, event.clientX, event.clientY));
+    }
+}
+
+function chooseCities() {
+    numberOfCities = parseInt(window.prompt("How many cities you want?"));
+    window.alert("Please click any where on screen, for " + numberOfCities + " times");
+    bodyClickListener = document.body.addEventListener("click", addClickLocationToCity);
+}
+
 function evolve() {
     console.log("evolve");
-    cities = generateCities(numberOfCities);
+    pencil.clearRect(0, 0, canvasMapElement.width, canvasMapElement.height);
+    if (randomCitiesCheckBoxElement.checked) {
+        cities = generateCities(numberOfCities);
+    } else {
+        chooseCities();
+        return;
+    }
     drawCities(cities);
     generateInitialPopulation(initialPopulationSize);
     sortPopulationByFitness(chromosomes);
 
-    for (let generation: number = 0; generation < numberOfGenerationsAllowed; generation++){
+    for (let generation: number = 0; generation < numberOfGenerationsAllowed; generation++) {
         console.log("Generation", generation);
-        for (let counter: number = 0; counter < numberOfOffspringsAllowed; counter++){
+        for (let counter: number = 0; counter < numberOfOffspringsAllowed; counter++) {
             let parentOneId: number = getRandomNumberInRange(0, chromosomes.length);
             let parentTwoId: number = getRandomNumberInRange(0, chromosomes.length);
             let offSpring = crossOver(chromosomes[parentOneId].route, chromosomes[parentTwoId].route);
             offSpring = mutateChromosome(offSpring);
             let strokeColor = `rgb(${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)})`;
             chromosomes.push(new Chromosome(numberOfChromosomesCreated, offSpring, calculateTravelDistance(offSpring), strokeColor));
-            drawRoute(offSpring, strokeColor);
+            // drawRoute(offSpring, strokeColor, 1);
         }
         sortPopulationByFitness(chromosomes);
-        console.info("Best travel Distance", chromosomes[0].travelDistance, chromosomes[0].route);
-        console.error("Bad  travel Distance", chromosomes[chromosomes.length-1].travelDistance, chromosomes[0].route);
+        drawRoute(chromosomes[0].route, "green", 5);
+        drawRoute(chromosomes[chromosomes.length - 1].route, "red", 2);
+        bestTravelDistaceElement.innerText = "Best travel Distance:" + chromosomes[0].travelDistance;
+        worstTravelDistanceElement.innerText = "Bad  travel Distance:" + chromosomes[chromosomes.length - 1].travelDistance;
+        chromosomes = chromosomes.slice(0, numberOfOffspringsAllowed);
     }
 }
 
 function generateInitialPopulation(size: number) {
+    chromosomes = [];
     for (let counter: number = 0; counter < size; counter++) {
         let chromosome = generateChromosome(numberOfCities);
         let strokeColor = `rgb(${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)})`;
         chromosomes.push(new Chromosome(numberOfChromosomesCreated, chromosome, calculateTravelDistance(chromosome), strokeColor));
-        drawRoute(chromosome, strokeColor);
+        // drawRoute(chromosome, strokeColor, 1);
     }
 }
 
@@ -146,6 +201,7 @@ function generateInitialPopulation(size: number) {
  * @returns {Array} cities - array of cities
  */
 function generateCities(numberOfCities: number) {
+
     let cities: City[] = [];
     let maxWidth: number = canvasMapElement.width;
     let maxHeight: number = canvasMapElement.height;
@@ -188,9 +244,10 @@ function generateChromosome(numberOfCities): number[] {
     return chromosome;
 }
 
-function drawRoute(chromosome: number[], strokeColor: string) {
+function drawRoute(chromosome: number[], strokeColor: string, lineWidth: number) {
     pencil.beginPath();
     pencil.moveTo(cities[0].x, cities[0].y);
+    pencil.lineWidth = lineWidth;
     chromosome.forEach(cityId => pencil.lineTo(cities[cityId].x, cities[cityId].y));
     pencil.strokeStyle = strokeColor;
     pencil.stroke();
@@ -239,7 +296,7 @@ function crossOver(parentOneChromosome, parentTwoChromosome) {
     return offSpring.concat(parentOneChromosomePart);
 }
 
-function mutateChromosome(chromosome: number[]):number[] {
+function mutateChromosome(chromosome: number[]): number[] {
     let mutatedChromosome: number[] = chromosome.slice();
     let temp: number = 0;
     let switchPosition1: number = 0;
@@ -252,6 +309,6 @@ function mutateChromosome(chromosome: number[]):number[] {
     return mutatedChromosome;
 }
 
-function sortPopulationByFitness(chromosomes: Chromosome[]):void{
+function sortPopulationByFitness(chromosomes: Chromosome[]): void {
     chromosomes.sort((cA, cB) => cA.travelDistance - cB.travelDistance);
 }
