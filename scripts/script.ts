@@ -7,8 +7,7 @@ const crossoverLimitElement = <HTMLInputElement>document.getElementById("rangeCr
 const evolveButtonElement = <HTMLInputElement>document.getElementById("btnEvolve");
 
 const tbdLogTableElement = <HTMLTableElement>document.getElementById("tbdLog");
-const randomCitiesCheckBoxElement = <HTMLInputElement>document.getElementById("checkboxRandomCities");
-const staticCitiesCheckBoxElement = <HTMLInputElement>document.getElementById("checkboxRandomCities");
+
 
 const citiesValueElement = <HTMLInputElement>document.getElementById("lblCitiesValue");
 const initialPopulationValueElement = <HTMLLabelElement>document.getElementById("lblInitialPopulationSizeValue");
@@ -18,6 +17,11 @@ const crossoverValueElement = <HTMLLabelElement>document.getElementById("lblCros
 
 const bestTravelDistaceElement = <HTMLLabelElement>document.getElementById("lblBestTravelDistance");
 const worstTravelDistanceElement = <HTMLLabelElement>document.getElementById("lblWorstTravelDistance");
+
+const showBestTravelDistanceCheckBoxElement = <HTMLInputElement>document.getElementById("checkboxShowBestTravelDistance");
+const showWorstTravelDistanceCheckBoxElement = <HTMLInputElement>document.getElementById("checkboxShowWorstTravelDistance");
+const summaryHeaderElement = <HTMLDetailsElement>document.getElementById("summaryHeader");
+const optionsDetailsElement = <HTMLDetailsElement>document.getElementById("options");
 
 let logs: Log[] = [];
 let resetChromosome: boolean = false;
@@ -34,8 +38,8 @@ let numberOfOffspringsAllowed = 5;
 let randomPointForCrossOver = Math.floor(numberOfCities / 2);
 
 function updateCanvasMapSize(): void {
-    canvasMapElement.width = window.innerWidth;
-    canvasMapElement.height = window.innerHeight;
+    canvasMapElement.width = window.innerWidth - 5;
+    canvasMapElement.height = (window.innerHeight - 30);
 }
 
 function modifyNumberOfCities(): void {
@@ -82,6 +86,8 @@ generationsLimitElement.addEventListener("change", modifyGenerationSize);
 offspringsLimitElement.addEventListener("change", modifyOffspringSize);
 crossoverLimitElement.addEventListener("change", modifyCrossOverValue);
 evolveButtonElement.addEventListener("click", evolve);
+showBestTravelDistanceCheckBoxElement.addEventListener('change', updateUI);
+showWorstTravelDistanceCheckBoxElement.addEventListener('change', updateUI);
 
 updateCanvasMapSize();
 
@@ -130,6 +136,9 @@ interface LogInterface {
     chromosomeCount: number;
     bestTravelScore: number;
     worstTravelScore: number;
+    bestTravelRoute: string;
+    worstTravelRoute: string;
+    timeStamp: string;
 }
 
 class Log implements LogInterface {
@@ -138,68 +147,47 @@ class Log implements LogInterface {
     chromosomeCount: number;
     bestTravelScore: number;
     worstTravelScore: number;
-    constructor(serialNumber: number, generationCount: number, chromosomeCount: number, bestTravelScore: number, worstTravelScore: number) {
+    bestTravelRoute: string;
+    worstTravelRoute: string;
+    timeStamp: string;
+
+    constructor(serialNumber: number, generationCount: number, chromosomeCount: number, bestTravelScore: number, worstTravelScore: number, bestTravelRoute: string, worstTravelRoute: string, timeStamp: string) {
         this.serialNumber = serialNumber;
         this.generationCount = generationCount;
         this.chromosomeCount = chromosomeCount;
         this.bestTravelScore = bestTravelScore;
         this.worstTravelScore = worstTravelScore;
+        this.bestTravelRoute = bestTravelRoute;
+        this.worstTravelRoute = worstTravelRoute;
+        this.timeStamp = timeStamp;
     }
 }
 
-function addClickLocationToCity(event) {
-    if (cities.length >= numberOfCities) {
-        document.body.removeEventListener("click", bodyClickListener);
-        window.alert(numberOfCities + " cities are added");
+function updateUI() {
 
-        drawCities(cities);
-        generateInitialPopulation(initialPopulationSize);
-        sortPopulationByFitness(chromosomes);
+    showBestTravelDistanceCheckBoxElement.hidden = false;
+    showWorstTravelDistanceCheckBoxElement.hidden = false;
 
-        for (let generation: number = 0; generation < numberOfGenerationsAllowed; generation++) {
-            console.log("Generation", generation);
-            for (let counter: number = 0; counter < numberOfOffspringsAllowed; counter++) {
-                let parentOneId: number = getRandomNumberInRange(0, chromosomes.length);
-                let parentTwoId: number = getRandomNumberInRange(0, chromosomes.length);
-                let offSpring = crossOver(chromosomes[parentOneId].route, chromosomes[parentTwoId].route);
-                offSpring = mutateChromosome(offSpring);
-                let strokeColor = `rgb(${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)})`;
-                chromosomes.push(new Chromosome(numberOfChromosomesCreated, offSpring, calculateTravelDistance(offSpring), strokeColor));
-                // drawRoute(offSpring, strokeColor, 1);
-            }
-            sortPopulationByFitness(chromosomes);
-            drawRoute(chromosomes[0].route, "green", 5);
-            drawRoute(chromosomes[chromosomes.length - 1].route, "red", 1);
-            console.info(chromosomes[0].travelDistance);
-            console.error(chromosomes[chromosomes.length - 1].travelDistance);
-            bestTravelDistaceElement.innerText = "Best travel Distance:" + chromosomes[0].travelDistance;
-            worstTravelDistanceElement.innerText = "Bad  travel Distance:" + chromosomes[chromosomes.length - 1].travelDistance;
-        }
-
+    pencil.beginPath();
+    pencil.clearRect(0, 0, canvasMapElement.width, canvasMapElement.height);
+    pencil.fillStyle = "#181a1b";
+    pencil.fillRect(0, 0, canvasMapElement.width, canvasMapElement.height);
+    pencil.closePath();
+    drawCities(cities);
+    if (showBestTravelDistanceCheckBoxElement.checked) {
+        drawRoute(chromosomes[0].route, "#2196f3", 3);
     }
-    if (event.target.id == "map") {
-        cities.push(new City(cities.length + 1, event.clientX, event.clientY));
+    if (showWorstTravelDistanceCheckBoxElement.checked) {
+        drawRoute(chromosomes[chromosomes.length - 1].route, "red", 1);
     }
-}
-
-function chooseCities() {
-    numberOfCities = parseInt(window.prompt("How many cities you want?"));
-    window.alert("Please click any where on screen, for " + numberOfCities + " times");
-    bodyClickListener = document.body.addEventListener("click", addClickLocationToCity);
+    bestTravelDistaceElement.innerText = "Best travel Distance:" + chromosomes[0].travelDistance;
+    worstTravelDistanceElement.innerText = "Bad  travel Distance:" + chromosomes[chromosomes.length - 1].travelDistance;
 }
 
 function evolve() {
 
-    // pencil.clearRect(0, 0, canvasMapElement.width, canvasMapElement.height);
     if (cities.length == 0 || resetCities) {
-        if (randomCitiesCheckBoxElement.checked) {
-            cities = generateCities(numberOfCities);
-        } else {
-            chooseCities();
-            return;
-        }
-        pencil.clearRect(0, 0, canvasMapElement.width, canvasMapElement.height);
-        drawCities(cities);
+        cities = generateCities(numberOfCities);
         resetCities = false;
     }
 
@@ -208,9 +196,9 @@ function evolve() {
         sortPopulationByFitness(chromosomes);
         resetChromosome = false;
     }
-    
+
     for (let generation: number = 0; generation < numberOfGenerationsAllowed; generation++) {
-        console.log("Generation", generation);
+
         for (let counter: number = 0; counter < numberOfOffspringsAllowed; counter++) {
             let parentOneId: number = getRandomNumberInRange(0, chromosomes.length);
             let parentTwoId: number = getRandomNumberInRange(0, chromosomes.length);
@@ -218,19 +206,14 @@ function evolve() {
             offSpring = mutateChromosome(offSpring);
             let strokeColor = `rgb(${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)})`;
             chromosomes.push(new Chromosome(numberOfChromosomesCreated, offSpring, calculateTravelDistance(offSpring), strokeColor));
-            // drawRoute(offSpring, strokeColor, 1);
         }
         sortPopulationByFitness(chromosomes);
-        drawRoute(chromosomes[0].route, "green", 5);
-        drawRoute(chromosomes[chromosomes.length - 1].route, "red", 1);
-        console.info(chromosomes[0].travelDistance);
-        console.error(chromosomes[chromosomes.length - 1].travelDistance);
-        logs.push(new Log(logs.length + 1, generation + 1, chromosomes.length * (generation + 1), chromosomes[0].travelDistance, chromosomes[chromosomes.length - 1].travelDistance));
-        bestTravelDistaceElement.innerText = "Best travel Distance:" + chromosomes[0].travelDistance;
-        worstTravelDistanceElement.innerText = "Bad  travel Distance:" + chromosomes[chromosomes.length - 1].travelDistance;
+        logs.push(new Log(logs.length + 1, generation + 1, chromosomes.length * (generation + 1), chromosomes[0].travelDistance, chromosomes[chromosomes.length - 1].travelDistance, chromosomes[0].route, chromosomes[chromosomes.length - 1].route, new Date().getMilliseconds().toString()));
         chromosomes = chromosomes.slice(0, numberOfOffspringsAllowed);
     }
     updateLog();
+    updateUI();
+    // cities = []; to reset everytime...
 }
 
 function generateInitialPopulation(size: number) {
@@ -263,13 +246,18 @@ function generateCities(numberOfCities: number) {
 
 let pencil = canvasMapElement.getContext("2d");
 
-function drawCities(listOfCities: City[]) {
-    console.log("drawCities" + "is called");
-    pencil.beginPath();
-    listOfCities.forEach((city) => pencil.fillRect(city.x, city.y, 5, 5 / 2));
-    pencil.stroke();
-    pencil.closePath();
-    return null; // typescript complains
+function drawCities(listOfCities: City[]): void {
+
+    listOfCities.forEach((city) => {
+        pencil.beginPath();
+        pencil.strokeStyle = "yellow";
+        pencil.lineWidth = 3;
+        pencil.arc(city.x, city.y, 10, 0, 2 * Math.PI);
+        pencil.fillStyle = "lightblue";
+        pencil.fillText(city.id.toString(), city.x, city.y);
+        pencil.stroke();
+        pencil.closePath();
+    });
 }
 
 function generateChromosome(numberOfCities): number[] {
@@ -288,7 +276,7 @@ function generateChromosome(numberOfCities): number[] {
         chromosome[switchPosition] = temp;
     }
     numberOfChromosomesCreated++;
-    // console.log('created chromosome #' + numberOfChromosomesCreated + ": " + chromosome);
+
     return chromosome;
 }
 
@@ -362,13 +350,17 @@ function sortPopulationByFitness(chromosomes: Chromosome[]): void {
 }
 
 function updateLog() {
+    logs.reverse();
     let logHtml: string = `
     <tr>
+        <th>Timestamp</th>
         <th>Serial Number</th>
-        <th>Generation Count</th>
-        <th>Chromosome Count</th>
+        <th>Generation</th>
+        <th>Chromosomes Created</th>
         <th>Best Travel Score</th>
         <th>Worst Travel Score</th>
+        <th>Best Travel Route</th>
+        <th>Worst Travel Route</th>
     </tr>
     `;
 
@@ -376,16 +368,42 @@ function updateLog() {
         logHtml +=
             `
             <tr>
-                <th>${log.serialNumber}</th>
-                <th>${log.generationCount}</th>
-                <th>${log.chromosomeCount}</th>
-                <th class="bestScore">${log.bestTravelScore}</th>
-                <th class="worstScore">${log.worstTravelScore}</th>
+                <td>${log.timeStamp}</td>
+                <td>${log.serialNumber}</td>
+                <td>${log.generationCount}</td>
+                <td>${log.chromosomeCount}</td>
+                <td class="bestScore">${log.bestTravelScore}</td>
+                <td class="worstScore">${log.worstTravelScore}</td>
+                <td class="bestScore">${log.bestTravelRoute}</td>
+                <td class="worstScore">${log.worstTravelRoute}</td>
             </tr>
             `
             ;
     }
 
     tbdLogTableElement.innerHTML = logHtml;
+    summaryHeaderElement.innerText = `Click Here & Scroll to see Complete Log: ${logs.length} Items`;
 
 }
+
+function init() {
+
+    citiesLimitElement.value = numberOfCities.toString();
+    initialPopulationLimitElement.value = initialPopulationSize.toString();
+    generationsLimitElement.value = numberOfGenerationsAllowed.toString();
+    offspringsLimitElement.value = numberOfOffspringsAllowed.toString();
+    crossoverLimitElement.value = randomPointForCrossOver.toString();
+
+
+    citiesValueElement.innerText = numberOfCities.toString();
+    initialPopulationValueElement.innerText = initialPopulationSize.toString();
+    generationsValueElement.innerText = numberOfGenerationsAllowed.toString();
+    offspringsValueElement.innerText = numberOfOffspringsAllowed.toString();
+    crossoverValueElement.innerText = randomPointForCrossOver.toString();
+
+    showBestTravelDistanceCheckBoxElement.hidden = true;
+    showWorstTravelDistanceCheckBoxElement.hidden = true;
+
+    optionsDetailsElement.open = true;
+}
+init();
