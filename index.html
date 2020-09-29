@@ -1,87 +1,164 @@
 <!DOCTYPE html>
 <html lang="en">
+<title>Genetic Algorithm Playground for Travelling Salesman Problem (TSP)
+</title>
+<!-- m  -->
+<meta charset="UTF-8">
+<meta name="author" content="Dilli Babu R">
+<meta name="description"
+    content="Genetic Algorithm Playground for TSP is simple Javascript implementation of Genetic Algorithm for Travelling Salesman Problem or commonly known as TSP">
+<meta name="theme-color" content="#daa520">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <link rel="stylesheet" href="styles/style.css">
-    <script src="scripts/script.js" defer></script>
+<!-- gp -->
+<meta itemprop="name"
+    content="Genetic Algorithm Playground for Travelling Salesman Problem (TSP)">
+<meta itemprop="description"
+    content="Genetic Algorithm Playground for TSP is simple Javascript implementation of Genetic Algorithm for Travelling Salesman Problem or commonly known as TSP">
+<meta itemprop="image" content="icon.png">
+
+<!-- t -->
+<meta name="twitter:card"
+    content="Genetic Algorithm Playground for Travelling Salesman Problem (TSP)">
+<meta name="twitter:title"
+    content="Genetic Algorithm Playground for Travelling Salesman Problem (TSP)">
+<meta name="twitter:description"
+    content="Genetic Algorithm Playground for TSP is simple Javascript implementation of Genetic Algorithm for Travelling Salesman Problem or commonly known as TSP">
+<meta name="twitter:creator" content="@dillir07">
+<meta name="twitter:image:src" content="icon.png">
+
+<!-- og  -->
+<meta property="og:title"
+    content="Genetic Algorithm Playground for Travelling Salesman Problem (TSP)" />
+<meta property="og:type" content="website" />
+<meta property="og:url"
+    content="https://github.com/dillir07/genetic-algorithm-travelling-salesman" />
+<meta property="og:site_name"
+    content="Genetic Algorithm Playground for Travelling Salesman Problem (TSP)" />
+<meta property="og:image" content="icon.png">
+<meta property="og:description"
+    content="Genetic Algorithm Playground for TSP is simple Javascript implementation of Genetic Algorithm for Travelling Salesman Problem or commonly known as TSP">
+<link rel="icon" href="icon.png" type="image/x-icon">
+<link rel="manifest" href="site.webmanifest">
+<link rel="stylesheet" href="styles/style.css">
+<script src="scripts/script.js" defer></script>
 </head>
 
 <body>
     <div id="mapContainer">
         <canvas id="map"></canvas>
     </div>
-    <div id="joystickContainer">
-        <div id="joystick">
-            <div>
-                <label for="cities">Cities:</label><label
-                    id="lblCitiesValue"></label>
+    <details id="options">
+        <summary>Options</summary>
+        <div id="joystickContainer">
+            <div id="joystick">
+                <div>
+                    <label for="cities">Cities:</label><label
+                        id="lblCitiesValue"></label>
+                    <br>
+                    <input type="range" min="3" max="100" name="cities"
+                        id="rangeCities">
+                    <br>
+                    <!-- <label for="randomCities">Use Random Cities: </label> <input
+                        type="checkbox" name="randomCities" checked="checked"
+                        id="checkboxRandomCities"> -->
+                    <!-- <br>
+                    <label for="staticCities">Use Same Cities: </label> <input
+                        type="checkbox" name="staticCities" checked="checked"
+                        id="checkboxStaticCities"> -->
+                </div>
+                <div>
+                    <label for="initialPopulation">Initial
+                        Population:</label><label
+                        id="lblInitialPopulationSizeValue"></label>
+                    <br>
+                    <input type="range" min="5" max="100"
+                        name="initialPopulation"
+                        id="rangeInitialPopulationSize">
+
+                </div>
+                <div>
+                    <label for="generationsAllowed">No of
+                        Generations:</label><label
+                        id="lblGenerationsAllowedValue"></label>
+                    <br>
+                    <input type="range" min="5" max="1000"
+                        name="generationsAllowed" id="rangeGenerationsAllowed">
+
+                </div>
+                <div>
+                    <label for="offsprings">No of offsprings per
+                        Generation:</label><label
+                        id="lblOffspringsAllowedValue"></label>
+                    <br>
+                    <input type="range" min="2" max="100" name="offsprings"
+                        id="rangeOffspringsAllowed">
+
+                </div>
+                <div>
+                    <label for="crossOverPoint">Crossoverpoint: </label><label
+                        id="lblCrossOverPointValue"></label>
+                    <br>
+                    <input type="range" min="2" max="100" name="crossOverPoint"
+                        id="rangeCrossOverPoint">
+
+                </div>
+
+                <div>
+                    <br>
+                    <input type="button" value="Play" id="btnEvolve">
+                </div>
                 <br>
-                <input type="range" min="3" max="100" name="cities"
-                    id="rangeCities">
-                <br>
-                <label for="randomCities">Use Random Cities: </label> <input
-                    type="checkbox" name="randomCities" checked="checked"
-                    id="checkboxRandomCities">
-                <!-- <br>
-                <label for="staticCities">Use Same Cities: </label> <input
-                    type="checkbox" name="staticCities" checked="checked"
-                    id="checkboxStaticCities"> -->
-            </div>
-            <div>
-                <label for="initialPopulation">Initial Population:</label><label
-                    id="lblInitialPopulationSizeValue"></label>
-                <br>
-                <input type="range" min="5" max="100" name="initialPopulation"
-                    id="rangeInitialPopulationSize">
+                <div id="about">
+                    <details>
+                        <summary>by dillir07, click to contact..</summary>
+                        <br>
+                        <div
+                            class="w3-bar w3-border w3-border-red w3-padding w3-card-2 w3-round-large">
+                            <a target="_blank"
+                                href="https://twitter.com/dillir07"
+                                class="contact-button"
+                                style="background-color: #1da1f2; color: white; margin:5px">Twitter</a>
+                            <a target="_blank"
+                                href="https://github.com/dillir07"
+                                class="contact-button"
+                                style="background-color: #24292e; color: white; margin:5px">Github</a>
+                            <a target="_blank"
+                                href="https://www.linkedin.com/in/dillir07/"
+                                class="contact-button"
+                                style="background-color: #007bb5; color: white; margin:5px">LinkedIn</a>
+                            <a target="_blank"
+                                href="https://facebook.com/dillir07"
+                                class="contact-button"
+                                style="background-color: #3b5998; color: white; margin:5px">Facebook</a>
+                            <a target="_blank" href="https://dev.to/dillir07"
+                                class="contact-button"
+                                style="background-color: #000000; color: white; margin:5px">DEV.TO</a>
+                        </div>
+                    </details>
+                </div>
+
+                <div>
+                    <br>
+                    <input type="checkbox" checked="checked"
+                        name="ShowBestTravelDistance"
+                        id="checkboxShowBestTravelDistance"><label
+                        id="lblBestTravelDistance"></label>
+                    <br>
+                    <input type="checkbox" name="ShowWorstTravelDistance"
+                        id="checkboxShowWorstTravelDistance"><label
+                        id="lblWorstTravelDistance"></label>
+                </div>
+
 
             </div>
-            <div>
-                <label for="generationsAllowed">No of Generations:</label><label
-                    id="lblGenerationsAllowedValue"></label>
-                <br>
-                <input type="range" min="5" max="100" name="generationsAllowed"
-                    id="rangeGenerationsAllowed">
-
-            </div>
-            <div>
-                <label for="offsprings">No of offsprings per
-                    Generation:</label><label
-                    id="lblOffspringsAllowedValue"></label>
-                <br>
-                <input type="range" min="2" max="100" name="offsprings"
-                    id="rangeOffspringsAllowed">
-
-            </div>
-            <div>
-                <label for="crossOverPoint">Crossoverpoint: </label><label
-                    id="lblCrossOverPointValue"></label>
-                <br>
-                <input type="range" min="2" max="100" name="crossOverPoint"
-                    id="rangeCrossOverPoint">
-
-            </div>
-
-            <div>
-                <br>
-                <input type="button" value="Evolve" id="btnEvolve">
-            </div>
-
-            <div>
-                <br>
-                <label id="lblBestTravelDistance"></label>
-                <br>
-                <label id="lblWorstTravelDistance"></label>
-            </div>
-
-
         </div>
-    </div>
+    </details>
+
     <div>
         <details>
-            <summary>See Complete Log</summary>
+            <summary id="summaryHeader">Click Here & Scroll to see Complete Log
+            </summary>
             <table id="tbdLog"></table>
         </details>
     </div>
