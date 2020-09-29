@@ -6,6 +6,7 @@ const offspringsLimitElement = <HTMLInputElement>document.getElementById("rangeO
 const crossoverLimitElement = <HTMLInputElement>document.getElementById("rangeCrossOverPoint");
 const evolveButtonElement = <HTMLInputElement>document.getElementById("btnEvolve");
 
+const tbdLogTableElement = <HTMLTableElement>document.getElementById("tbdLog");
 const randomCitiesCheckBoxElement = <HTMLInputElement>document.getElementById("checkboxRandomCities");
 const staticCitiesCheckBoxElement = <HTMLInputElement>document.getElementById("checkboxRandomCities");
 
@@ -18,6 +19,7 @@ const crossoverValueElement = <HTMLLabelElement>document.getElementById("lblCros
 const bestTravelDistaceElement = <HTMLLabelElement>document.getElementById("lblBestTravelDistance");
 const worstTravelDistanceElement = <HTMLLabelElement>document.getElementById("lblWorstTravelDistance");
 
+let logs: Log[] = [];
 let resetChromosome: boolean = false;
 let resetCities: boolean = false;
 let bodyClickListener: any;
@@ -122,6 +124,29 @@ class City implements CityInterface {
     }
 }
 
+interface LogInterface {
+    serialNumber: number;
+    generationCount: number;
+    chromosomeCount: number;
+    bestTravelScore: number;
+    worstTravelScore: number;
+}
+
+class Log implements LogInterface {
+    serialNumber: number;
+    generationCount: number;
+    chromosomeCount: number;
+    bestTravelScore: number;
+    worstTravelScore: number;
+    constructor(serialNumber: number, generationCount: number, chromosomeCount: number, bestTravelScore: number, worstTravelScore: number) {
+        this.serialNumber = serialNumber;
+        this.generationCount = generationCount;
+        this.chromosomeCount = chromosomeCount;
+        this.bestTravelScore = bestTravelScore;
+        this.worstTravelScore = worstTravelScore;
+    }
+}
+
 function addClickLocationToCity(event) {
     if (cities.length >= numberOfCities) {
         document.body.removeEventListener("click", bodyClickListener);
@@ -200,10 +225,12 @@ function evolve() {
         drawRoute(chromosomes[chromosomes.length - 1].route, "red", 1);
         console.info(chromosomes[0].travelDistance);
         console.error(chromosomes[chromosomes.length - 1].travelDistance);
+        logs.push(new Log(logs.length + 1, generation + 1, chromosomes.length * (generation + 1), chromosomes[0].travelDistance, chromosomes[chromosomes.length - 1].travelDistance));
         bestTravelDistaceElement.innerText = "Best travel Distance:" + chromosomes[0].travelDistance;
         worstTravelDistanceElement.innerText = "Bad  travel Distance:" + chromosomes[chromosomes.length - 1].travelDistance;
         chromosomes = chromosomes.slice(0, numberOfOffspringsAllowed);
     }
+    updateLog();
 }
 
 function generateInitialPopulation(size: number) {
@@ -332,4 +359,33 @@ function mutateChromosome(chromosome: number[]): number[] {
 
 function sortPopulationByFitness(chromosomes: Chromosome[]): void {
     chromosomes.sort((cA, cB) => cA.travelDistance - cB.travelDistance);
+}
+
+function updateLog() {
+    let logHtml: string = `
+    <tr>
+        <th>Serial Number</th>
+        <th>Generation Count</th>
+        <th>Chromosome Count</th>
+        <th>Best Travel Score</th>
+        <th>Worst Travel Score</th>
+    </tr>
+    `;
+
+    for (let log of logs) {
+        logHtml +=
+            `
+            <tr>
+                <th>${log.serialNumber}</th>
+                <th>${log.generationCount}</th>
+                <th>${log.chromosomeCount}</th>
+                <th class="bestScore">${log.bestTravelScore}</th>
+                <th class="worstScore">${log.worstTravelScore}</th>
+            </tr>
+            `
+            ;
+    }
+
+    tbdLogTableElement.innerHTML = logHtml;
+
 }

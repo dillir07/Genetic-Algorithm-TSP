@@ -5,6 +5,7 @@ var generationsLimitElement = document.getElementById("rangeGenerationsAllowed")
 var offspringsLimitElement = document.getElementById("rangeOffspringsAllowed");
 var crossoverLimitElement = document.getElementById("rangeCrossOverPoint");
 var evolveButtonElement = document.getElementById("btnEvolve");
+var tbdLogTableElement = document.getElementById("tbdLog");
 var randomCitiesCheckBoxElement = document.getElementById("checkboxRandomCities");
 var staticCitiesCheckBoxElement = document.getElementById("checkboxRandomCities");
 var citiesValueElement = document.getElementById("lblCitiesValue");
@@ -14,6 +15,7 @@ var offspringsValueElement = document.getElementById("lblOffspringsAllowedValue"
 var crossoverValueElement = document.getElementById("lblCrossOverPointValue");
 var bestTravelDistaceElement = document.getElementById("lblBestTravelDistance");
 var worstTravelDistanceElement = document.getElementById("lblWorstTravelDistance");
+var logs = [];
 var resetChromosome = false;
 var resetCities = false;
 var bodyClickListener;
@@ -87,6 +89,16 @@ var City = /** @class */ (function () {
     }
     return City;
 }());
+var Log = /** @class */ (function () {
+    function Log(serialNumber, generationCount, chromosomeCount, bestTravelScore, worstTravelScore) {
+        this.serialNumber = serialNumber;
+        this.generationCount = generationCount;
+        this.chromosomeCount = chromosomeCount;
+        this.bestTravelScore = bestTravelScore;
+        this.worstTravelScore = worstTravelScore;
+    }
+    return Log;
+}());
 function addClickLocationToCity(event) {
     if (cities.length >= numberOfCities) {
         document.body.removeEventListener("click", bodyClickListener);
@@ -158,10 +170,12 @@ function evolve() {
         drawRoute(chromosomes[chromosomes.length - 1].route, "red", 1);
         console.info(chromosomes[0].travelDistance);
         console.error(chromosomes[chromosomes.length - 1].travelDistance);
+        logs.push(new Log(logs.length + 1, generation + 1, chromosomes.length * (generation + 1), chromosomes[0].travelDistance, chromosomes[chromosomes.length - 1].travelDistance));
         bestTravelDistaceElement.innerText = "Best travel Distance:" + chromosomes[0].travelDistance;
         worstTravelDistanceElement.innerText = "Bad  travel Distance:" + chromosomes[chromosomes.length - 1].travelDistance;
         chromosomes = chromosomes.slice(0, numberOfOffspringsAllowed);
     }
+    updateLog();
 }
 function generateInitialPopulation(size) {
     chromosomes = [];
@@ -270,4 +284,13 @@ function mutateChromosome(chromosome) {
 }
 function sortPopulationByFitness(chromosomes) {
     chromosomes.sort(function (cA, cB) { return cA.travelDistance - cB.travelDistance; });
+}
+function updateLog() {
+    var logHtml = "\n    <tr>\n        <th>Serial Number</th>\n        <th>Generation Count</th>\n        <th>Chromosome Count</th>\n        <th>Best Travel Score</th>\n        <th>Worst Travel Score</th>\n    </tr>\n    ";
+    for (var _i = 0, logs_1 = logs; _i < logs_1.length; _i++) {
+        var log = logs_1[_i];
+        logHtml +=
+            "\n            <tr>\n                <th>" + log.serialNumber + "</th>\n                <th>" + log.generationCount + "</th>\n                <th>" + log.chromosomeCount + "</th>\n                <th class=\"bestScore\">" + log.bestTravelScore + "</th>\n                <th class=\"worstScore\">" + log.worstTravelScore + "</th>\n            </tr>\n            ";
+    }
+    tbdLogTableElement.innerHTML = logHtml;
 }
