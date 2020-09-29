@@ -1,10 +1,15 @@
 body {
     margin: 0px;
-    font-family: cursive
+    font-family: "Open Sans", Calibri, sans-serif;
+    background-color: #181a1b;
+    color: #daa520;
+    font-size: large;
 }
 
 #mapContainer {
-    border: solid black 5px;
+    border: none;
+    margin: 0px;
+    padding: 0px;
     width: auto;
     height: auto;
 }
@@ -16,12 +21,7 @@ body {
 
 #joystickContainer {
     border: solid gold 5px;
-    /* width: 600px; */
-    /* height: 600px; */
-    position: fixed;
-    right: 0px;
-    top: 0px;
-    background: transparent;
+    background-color: rgba(0,0,0, 0.8) ;
 }
 
 #joystick {
@@ -49,8 +49,8 @@ body {
 }
 
 #btnEvolve {
-  background: #2196f3;
-  color:white;
+  background: goldenrod;
+  color:333;
   font-size: xx-large;
   border-radius: 5px;
   border: none;
@@ -60,6 +60,40 @@ body {
   height: 9px;
   width: 9px;
 }
+
+#summaryHeader {
+  position: sticky;
+  bottom: 1px;
+  left: 1px;
+  /* z-index: 9999; */
+}
+
+#options {
+  position: fixed;
+  top: 1px;
+  right: 1px;
+  /* z-index: 9999; */
+}
+
+.contact-button{
+  text-decoration: none;
+  font-size: large;
+  border: none;
+  padding: 5px;
+  border-radius: 10px;
+  box-shadow: cornsilk;
+}
+
+#tbdLog{
+  border-collapse: collapse;
+  border: solid goldenrod 1px;
+}
+
+td, th {
+  border:solid goldenrod 1px;
+  padding: 2px 5px;
+}
+/* Danger zone... do not change anything from this point, ref:csstricks */
 
 input[type=range] {
     -webkit-appearance: none; /* Hides the slider so that custom slider can be made */
@@ -88,19 +122,19 @@ input[type=range] {
   /* Special styling for WebKit/Blink */
 input[type=range]::-webkit-slider-thumb {
     -webkit-appearance: none;
-    border: 1px solid #e2e2e2;
+    border: 1px solid goldenrod;
     height: 16px;
     width: 16px;
     border-radius: 3px;
-    background: #ffffff;
+    background: goldenrod;
     cursor: pointer;
     margin-top: -14px; /* You need to specify a margin in Chrome, but in Firefox and IE it is automatic */
-    box-shadow: 1px 1px 1px #d9e8fa, 0px 0px 1px #0d0d0d; /* Add cool effects to your sliders! */
+    box-shadow: 1px 1px 1px gold, 0px 0px 1px gold; /* Add cool effects to your sliders! */
   }
   
   /* All the same stuff for Firefox */
   input[type=range]::-moz-range-thumb {
-    box-shadow: 1px 1px 1px #ece6e6, 0px 0px 1px #0d0d0d;
+    box-shadow: 1px 1px 1px gold, 0px 0px 1px gold;
     border: 1px solid #e0d9d9;
     height: 16px;
     width: 16px;
@@ -111,12 +145,12 @@ input[type=range]::-webkit-slider-thumb {
   
   /* All the same stuff for IE */
   input[type=range]::-ms-thumb {
-    box-shadow: 1px 1px 1px #faf8f8, 0px 0px 1px #0d0d0d;
-    border: 1px solid #f0eded;
+    box-shadow: 1px 1px 1px gold, 0px 0px 1px gold;
+    border: 1px solid goldenrod;
     height: 36px;
     width: 16px;
     border-radius: 3px;
-    background: #ffffff;
+    background: goldenrod;
     cursor: pointer;
   }
 
@@ -124,24 +158,24 @@ input[type=range]::-webkit-slider-thumb {
     width: 100%;
     height: 5px;
     cursor: pointer;
-    box-shadow: 1px 1px 1px #cfcbcb, 0px 0px 1px #0d0d0d;
-    background: #2196f3;
+    box-shadow: 1px 1px 1px gold, 0px 0px 1px gold;
+    background: goldenrod;
     border-radius: 1.3px;
-    border: 0.2px solid #e0dede;
+    border: 0.2px solid gold;
   }
   
   input[type=range]:focus::-webkit-slider-runnable-track {
-    background: #367ebd;
+    background: goldenrod;
   }
   
   input[type=range]::-moz-range-track {
     width: 100%;
     height: 5px;
     cursor: pointer;
-    box-shadow: 1px 1px 1px #333, 0px 0px 1px #0d0d0d;
-    background: #2196f3; /* chrome */
+    box-shadow: 1px 1px 1px gold, 0px 0px 1px gold;
+    background: goldenrod; /* chrome */
     border-radius: 1.3px;
-    border: 0.2px solid #ddd;
+    border: 0.2px solid gold;
   }
   
   input[type=range]::-ms-track {
@@ -153,6 +187,7 @@ input[type=range]::-webkit-slider-thumb {
     border-width: 16px 0;
     color: transparent;
   }
+  /* who uses IE anymore...? sorry :) */
   input[type=range]::-ms-fill-lower {
     background: #333;
     border: 0.2px solid #333;
