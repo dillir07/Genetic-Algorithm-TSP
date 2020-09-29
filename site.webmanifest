@@ -1,0 +1,15 @@
+    {
+        "name": "Genetic Algorithm Playground for Travelling Salesman Problem (TSP)",
+        "short_name": "Genetic Algorithm Playground",
+        "description": "Genetic Algorithm Playground for TSP is simple Javascript implementation of Genetic Algorithm for Travelling Salesman Problem or commonly known as TSP",
+        "icons": [
+            {
+                "src": "chrome.png",
+                "sizes": "512x512",
+                "type": "image/png"
+            }
+        ],
+        "theme_color": "#daa520",
+        "background_color": "#181a1b",
+        "display": "standalone"
+    }
