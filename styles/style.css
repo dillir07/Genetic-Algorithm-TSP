@@ -40,6 +40,14 @@ body {
   font-size: larger;
 }
 
+.bestScore {
+  color: green;
+}
+
+.worstScore {
+  color: red;
+}
+
 #btnEvolve {
   background: #2196f3;
   color:white;
