@@ -93,6 +93,16 @@ body {
   border: solid goldenrod 1px;
 }
 
+#helpSection {
+  position: fixed;
+  top: 1px;
+  left: 1px;
+}
+
+dd {
+  font-size: medium;
+}
+
 td, th {
   border:solid goldenrod 1px;
   padding: 2px 5px;
