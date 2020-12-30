@@ -115,18 +115,21 @@ interface ChromosomeInterface {
 class Chromosome implements ChromosomeInterface {
     id: number;
     route: number[];
+    completeRoute: number[];
     travelDistance: number;
     rgbColor: string;
     /**
      * Inits the Chromosome with given properties
      * @param id - unique id, normally incrementing integer
      * @param route - list of integers, denoting the sequence in which each city will be visited
+     * @param completeRoute - list of integers, starting and ending at the origin city
      * @param travelDistance - denotes the travel distance required to visit all cities
      * @param rgbColor - A color denoting the path
      */
-    constructor(id: number, route: number[], travelDistance: number, rgbColor: string) {
+    constructor(id: number, route: number[], completeRoute: number[], travelDistance: number, rgbColor: string) {
         this.id = id;
         this.route = route;
+        this.completeRoute = completeRoute;
         this.travelDistance = travelDistance;
         this.rgbColor = rgbColor;
     }
@@ -185,6 +188,30 @@ class Log implements LogInterface {
 }
 
 /**
+ * takes an chromosome number array, removes zero elements (whereever it is),
+ * then adds zero in the beggining and in the end and then returns the new array
+ * @param chromosome - [1, 4, 0, 3, 2]
+ * @returns number[] - [0, 1, 4, 3, 2, 0]
+ */
+function getCompleteChromosome(chromosome: number[]): number[] {
+    let completeChromosomeString: string = chromosome.join(",");
+    if (completeChromosomeString.indexOf("0,") === 0) {
+        completeChromosomeString = completeChromosomeString.slice(2);
+    } else if (completeChromosomeString.indexOf(",0,") !== -1) {
+        let middleZeroIndex: number = completeChromosomeString.indexOf(",0,");
+        completeChromosomeString = completeChromosomeString.substring(0, middleZeroIndex) + "," + completeChromosomeString.substring(middleZeroIndex + 3,);
+    } else if (completeChromosomeString.indexOf(",0") + 2 === completeChromosomeString.length) {
+        completeChromosomeString = completeChromosomeString.substring(0, completeChromosomeString.length - 2);
+    }
+    completeChromosomeString = "0," + completeChromosomeString + ",0";
+    let completeChromosomeArray: number[];
+
+    completeChromosomeArray = completeChromosomeString.split(",").map(char => parseInt(char));
+
+    return completeChromosomeArray;
+}
+
+/**
  * Updates the UI components with updated values
  */
 function updateUI() {
@@ -199,10 +226,10 @@ function updateUI() {
     pencil.closePath();
     drawCities(cities);
     if (showBestTravelDistanceCheckBoxElement.checked) {
-        drawRoute(chromosomes[0].route, "#2196f3", 3);
+        drawRoute(chromosomes[0].completeRoute, "#2196f3", 3);
     }
     if (showWorstTravelDistanceCheckBoxElement.checked) {
-        drawRoute(chromosomes[chromosomes.length - 1].route, "red", 1);
+        drawRoute(chromosomes[chromosomes.length - 1].completeRoute, "red", 1);
     }
     bestTravelDistaceElement.innerText = "Best travel Distance:" + chromosomes[0].travelDistance;
     worstTravelDistanceElement.innerText = "Bad  travel Distance:" + chromosomes[chromosomes.length - 1].travelDistance;
@@ -232,7 +259,8 @@ function evolve() {
             let offSpring = crossOver(chromosomes[parentOneId].route, chromosomes[parentTwoId].route);
             offSpring = mutateChromosome(offSpring);
             let strokeColor = `rgb(${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)})`;
-            chromosomes.push(new Chromosome(numberOfChromosomesCreated, offSpring, calculateTravelDistance(offSpring), strokeColor));
+            let completeRouteForOffspring = getCompleteChromosome(offSpring);
+            chromosomes.push(new Chromosome(numberOfChromosomesCreated, offSpring, completeRouteForOffspring, calculateTravelDistance(completeRouteForOffspring), strokeColor));
         }
         sortPopulationByFitness(chromosomes);
         logs.push(new Log(logs.length + 1, generation + 1, chromosomes.length * (generation + 1), chromosomes[0].travelDistance, chromosomes[chromosomes.length - 1].travelDistance, chromosomes[0].route, chromosomes[chromosomes.length - 1].route, new Date().getMilliseconds().toString()));
@@ -252,7 +280,8 @@ function generateInitialPopulation(size: number) {
     for (let counter: number = 0; counter < size; counter++) {
         let chromosome = generateChromosome(numberOfCities);
         let strokeColor = `rgb(${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)},${getRandomNumberInRange(0, 255)})`;
-        chromosomes.push(new Chromosome(numberOfChromosomesCreated, chromosome, calculateTravelDistance(chromosome), strokeColor));
+        let completeRouteForOffspring = getCompleteChromosome(chromosome);
+        chromosomes.push(new Chromosome(numberOfChromosomesCreated, chromosome, completeRouteForOffspring, calculateTravelDistance(completeRouteForOffspring), strokeColor));
         // drawRoute(chromosome, strokeColor, 1);
     }
 }
@@ -298,6 +327,7 @@ function drawCities(listOfCities: City[]): void {
 /**
  * Generates a random chromosome of give size
  * @param {Number} numberOfCities - size of cities
+ * @returns {number[]} chromosome - a dna
  */
 function generateChromosome(numberOfCities): number[] {
     let chromosome: Array<number> = [];
@@ -315,7 +345,7 @@ function generateChromosome(numberOfCities): number[] {
         chromosome[switchPosition] = temp;
     }
     numberOfChromosomesCreated++;
-
+    
     return chromosome;
 }
 
@@ -337,6 +367,7 @@ function drawRoute(chromosome: number[], strokeColor: string, lineWidth: number)
 
 /**
  * returns the distance between any two points in 2D plane
+ * @deprecated
  * @param city1 - A coordinate denoting first point
  * @param city2 - A coordinate denoting second point
  */
@@ -346,14 +377,14 @@ function getDistanceBetweenTwoCities(city1: City, city2: City) {
 
 /**
  * Returns the distance between two cities (two points in a 2D plane)
- * ref: https://www.mathsisfun.com/algebra/distance-2-points.html (it really is :)
+ * ref: https://www.mathsisfun.com/algebra/distance-2-points.html (it really is :) )
  * @param {number} city1Id - a positive integer denoting a valid city id
  * @param {number} city2Id - a positive integer denoting a valid city id
  */
 function getDistanceBetweenTwoCitiesByIds(city1Id: number, city2Id: number) {
     let city1: City = cities[city1Id];
     let city2: City = cities[city2Id];
-
+    
     return Math.sqrt(Math.pow((city2.x - city1.x), 2) + Math.pow((city2.y - city1.y), 2));
 }
 
@@ -362,13 +393,14 @@ function getDistanceBetweenTwoCitiesByIds(city1Id: number, city2Id: number) {
  * @param chromosome - A chromosome denoting a path
  */
 function calculateTravelDistance(chromosome: number[]): number {
-    let travelDistance: number = 0.0; //yes float here
-    for (let cityId = 0; cityId < chromosome.length - 1; cityId++) {
-        let cityId1: number = chromosome[cityId];
-        let cityId2: number = chromosome[cityId + 1];
+    let travelDistance:number = 0.0; //yes float here
+    for (let counter = 0; counter < chromosome.length - 1; counter++) {
+
+        let cityId1: number = chromosome[counter];
+        let cityId2: number = chromosome[counter + 1];
+
         travelDistance += getDistanceBetweenTwoCitiesByIds(cityId1, cityId2);
     }
-    // console.log(`chromesome ${chromosome}'s travel distance: ${travelDistance}`);
     return travelDistance;
 }
 
