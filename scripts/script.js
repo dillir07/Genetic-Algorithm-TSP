@@ -21,6 +21,11 @@ var logs = [];
 var resetChromosome = false;
 var resetCities = false;
 var bodyClickListener;
+/**
+ * Returns a random number between given lower and upperbounds
+ * @param {Number} min - Lowerbound
+ * @param {Number} max - Upperbound
+ */
 var getRandomNumberInRange = function (min, max) { return Math.floor((Math.random() * max) + min); };
 var numberOfCities = 5;
 var numberOfChromosomesCreated = 5; // counter
@@ -30,6 +35,9 @@ var initialPopulationSize = 5;
 var numberOfGenerationsAllowed = 5;
 var numberOfOffspringsAllowed = 5;
 var randomPointForCrossOver = Math.floor(numberOfCities / 2);
+/**
+ * Updates the canvas size based on available screensize
+ */
 function updateCanvasMapSize() {
     canvasMapElement.width = window.innerWidth - 5;
     canvasMapElement.height = (window.innerHeight - 30);
@@ -76,10 +84,22 @@ evolveButtonElement.addEventListener("click", evolve);
 showBestTravelDistanceCheckBoxElement.addEventListener('change', updateUI);
 showWorstTravelDistanceCheckBoxElement.addEventListener('change', updateUI);
 updateCanvasMapSize();
+/**
+ * A Chromosome or individual
+ */
 var Chromosome = /** @class */ (function () {
-    function Chromosome(id, route, travelDistance, rgbColor) {
+    /**
+     * Inits the Chromosome with given properties
+     * @param id - unique id, normally incrementing integer
+     * @param route - list of integers, denoting the sequence in which each city will be visited
+     * @param completeRoute - list of integers, starting and ending at the origin city
+     * @param travelDistance - denotes the travel distance required to visit all cities
+     * @param rgbColor - A color denoting the path
+     */
+    function Chromosome(id, route, completeRoute, travelDistance, rgbColor) {
         this.id = id;
         this.route = route;
+        this.completeRoute = completeRoute;
         this.travelDistance = travelDistance;
         this.rgbColor = rgbColor;
     }
@@ -106,6 +126,32 @@ var Log = /** @class */ (function () {
     }
     return Log;
 }());
+/**
+ * takes an chromosome number array, removes zero elements (whereever it is),
+ * then adds zero in the beggining and in the end and then returns the new array
+ * @param chromosome - [1, 4, 0, 3, 2]
+ * @returns number[] - [0, 1, 4, 3, 2, 0]
+ */
+function getCompleteChromosome(chromosome) {
+    var completeChromosomeString = chromosome.join(",");
+    if (completeChromosomeString.indexOf("0,") === 0) {
+        completeChromosomeString = completeChromosomeString.slice(2);
+    }
+    else if (completeChromosomeString.indexOf(",0,") !== -1) {
+        var middleZeroIndex = completeChromosomeString.indexOf(",0,");
+        completeChromosomeString = completeChromosomeString.substring(0, middleZeroIndex) + "," + completeChromosomeString.substring(middleZeroIndex + 3);
+    }
+    else if (completeChromosomeString.indexOf(",0") + 2 === completeChromosomeString.length) {
+        completeChromosomeString = completeChromosomeString.substring(0, completeChromosomeString.length - 2);
+    }
+    completeChromosomeString = "0," + completeChromosomeString + ",0";
+    var completeChromosomeArray;
+    completeChromosomeArray = completeChromosomeString.split(",").map(function (char) { return parseInt(char); });
+    return completeChromosomeArray;
+}
+/**
+ * Updates the UI components with updated values
+ */
 function updateUI() {
     showBestTravelDistanceCheckBoxElement.hidden = false;
     showWorstTravelDistanceCheckBoxElement.hidden = false;
@@ -116,14 +162,17 @@ function updateUI() {
     pencil.closePath();
     drawCities(cities);
     if (showBestTravelDistanceCheckBoxElement.checked) {
-        drawRoute(chromosomes[0].route, "#2196f3", 3);
+        drawRoute(chromosomes[0].completeRoute, "#2196f3", 3);
     }
     if (showWorstTravelDistanceCheckBoxElement.checked) {
-        drawRoute(chromosomes[chromosomes.length - 1].route, "red", 1);
+        drawRoute(chromosomes[chromosomes.length - 1].completeRoute, "red", 1);
     }
     bestTravelDistaceElement.innerText = "Best travel Distance:" + chromosomes[0].travelDistance;
     worstTravelDistanceElement.innerText = "Bad  travel Distance:" + chromosomes[chromosomes.length - 1].travelDistance;
 }
+/**
+ * like a main function, responsible for driving the whole genetic algorithm
+ */
 function evolve() {
     if (cities.length == 0 || resetCities) {
         cities = generateCities(numberOfCities);
@@ -141,7 +190,8 @@ function evolve() {
             var offSpring = crossOver(chromosomes[parentOneId].route, chromosomes[parentTwoId].route);
             offSpring = mutateChromosome(offSpring);
             var strokeColor = "rgb(" + getRandomNumberInRange(0, 255) + "," + getRandomNumberInRange(0, 255) + "," + getRandomNumberInRange(0, 255) + ")";
-            chromosomes.push(new Chromosome(numberOfChromosomesCreated, offSpring, calculateTravelDistance(offSpring), strokeColor));
+            var completeRouteForOffspring = getCompleteChromosome(offSpring);
+            chromosomes.push(new Chromosome(numberOfChromosomesCreated, offSpring, completeRouteForOffspring, calculateTravelDistance(completeRouteForOffspring), strokeColor));
         }
         sortPopulationByFitness(chromosomes);
         logs.push(new Log(logs.length + 1, generation + 1, chromosomes.length * (generation + 1), chromosomes[0].travelDistance, chromosomes[chromosomes.length - 1].travelDistance, chromosomes[0].route, chromosomes[chromosomes.length - 1].route, new Date().getMilliseconds().toString()));
@@ -151,12 +201,17 @@ function evolve() {
     updateUI();
     // cities = []; to reset everytime...
 }
+/**
+ * Generates the initial population of chromosomes as per given size
+ * @param {Number} size - Number of chromosomes (individuals) to create
+ */
 function generateInitialPopulation(size) {
     chromosomes = [];
     for (var counter = 0; counter < size; counter++) {
         var chromosome = generateChromosome(numberOfCities);
         var strokeColor = "rgb(" + getRandomNumberInRange(0, 255) + "," + getRandomNumberInRange(0, 255) + "," + getRandomNumberInRange(0, 255) + ")";
-        chromosomes.push(new Chromosome(numberOfChromosomesCreated, chromosome, calculateTravelDistance(chromosome), strokeColor));
+        var completeRouteForOffspring = getCompleteChromosome(chromosome);
+        chromosomes.push(new Chromosome(numberOfChromosomesCreated, chromosome, completeRouteForOffspring, calculateTravelDistance(completeRouteForOffspring), strokeColor));
         // drawRoute(chromosome, strokeColor, 1);
     }
 }
@@ -176,6 +231,10 @@ function generateCities(numberOfCities) {
     return cities;
 }
 var pencil = canvasMapElement.getContext("2d");
+/**
+ * Draws Cities on the screen
+ * @param listOfCities - List of City Objects
+ */
 function drawCities(listOfCities) {
     listOfCities.forEach(function (city) {
         pencil.beginPath();
@@ -188,6 +247,11 @@ function drawCities(listOfCities) {
         pencil.closePath();
     });
 }
+/**
+ * Generates a random chromosome of give size
+ * @param {Number} numberOfCities - size of cities
+ * @returns {number[]} chromosome - a dna
+ */
 function generateChromosome(numberOfCities) {
     var chromosome = [];
     var switchPosition = 0;
@@ -204,6 +268,12 @@ function generateChromosome(numberOfCities) {
     numberOfChromosomesCreated++;
     return chromosome;
 }
+/**
+ * Draws the given route
+ * @param chromosome - Chromosome which defines the path or route to be drawn
+ * @param strokeColor - path color
+ * @param lineWidth - path width
+ */
 function drawRoute(chromosome, strokeColor, lineWidth) {
     pencil.beginPath();
     pencil.moveTo(cities[0].x, cities[0].y);
@@ -213,12 +283,18 @@ function drawRoute(chromosome, strokeColor, lineWidth) {
     pencil.stroke();
     pencil.closePath();
 }
+/**
+ * returns the distance between any two points in 2D plane
+ * @deprecated
+ * @param city1 - A coordinate denoting first point
+ * @param city2 - A coordinate denoting second point
+ */
 function getDistanceBetweenTwoCities(city1, city2) {
     return Math.sqrt(Math.pow((city2.x - city1.x), 2) + Math.pow((city2.y - city1.y), 2));
 }
 /**
  * Returns the distance between two cities (two points in a 2D plane)
- * ref: https://www.mathsisfun.com/algebra/distance-2-points.html (it really is)
+ * ref: https://www.mathsisfun.com/algebra/distance-2-points.html (it really is :) )
  * @param {number} city1Id - a positive integer denoting a valid city id
  * @param {number} city2Id - a positive integer denoting a valid city id
  */
@@ -227,16 +303,25 @@ function getDistanceBetweenTwoCitiesByIds(city1Id, city2Id) {
     var city2 = cities[city2Id];
     return Math.sqrt(Math.pow((city2.x - city1.x), 2) + Math.pow((city2.y - city1.y), 2));
 }
+/**
+ * Calculates the travel distance for given path/chromosome
+ * @param chromosome - A chromosome denoting a path
+ */
 function calculateTravelDistance(chromosome) {
     var travelDistance = 0.0; //yes float here
-    for (var cityId = 0; cityId < chromosome.length - 1; cityId++) {
-        var cityId1 = chromosome[cityId];
-        var cityId2 = chromosome[cityId + 1];
+    for (var counter = 0; counter < chromosome.length - 1; counter++) {
+        var cityId1 = chromosome[counter];
+        var cityId2 = chromosome[counter + 1];
         travelDistance += getDistanceBetweenTwoCitiesByIds(cityId1, cityId2);
     }
-    // console.log(`chromesome ${chromosome}'s travel distance: ${travelDistance}`);
     return travelDistance;
 }
+/**
+ * Generates new offspring by doing a crossover between given two parents' chromosomes
+ * Using Uni-Point crossover method here, to be simpler.
+ * @param parentOneChromosome - Parent one's chromosome
+ * @param parentTwoChromosome - Parent two's chromosome
+ */
 function crossOver(parentOneChromosome, parentTwoChromosome) {
     var offSpring = [];
     var parentOneChromosomePart = [];
@@ -247,6 +332,10 @@ function crossOver(parentOneChromosome, parentTwoChromosome) {
     });
     return offSpring.concat(parentOneChromosomePart);
 }
+/**
+ * Mutates the given chromosome (offspring) by doing a swap of randomly choosen gene
+ * @param chromosome - Offspring which needs to be mutated
+ */
 function mutateChromosome(chromosome) {
     var mutatedChromosome = chromosome.slice();
     var temp = 0;
@@ -259,9 +348,18 @@ function mutateChromosome(chromosome) {
     mutatedChromosome[switchPosition2] = temp;
     return mutatedChromosome;
 }
+/**
+ * Sorts the whole population or chromosomes by sorting
+ * Chromosomes with less travel distance takes precendence
+ * @param chromosomes - list of all chromosomes or entire population
+ */
 function sortPopulationByFitness(chromosomes) {
     chromosomes.sort(function (cA, cB) { return cA.travelDistance - cB.travelDistance; });
 }
+/**
+ * Updates the log in the UI in a tabular structure
+ * Each entry denotes a generation
+ */
 function updateLog() {
     logs.reverse();
     var logHtml = "\n    <tr>\n        <th>Timestamp</th>\n        <th>Serial Number</th>\n        <th>Generation</th>\n        <th>Chromosomes Created</th>\n        <th>Best Travel Score</th>\n        <th>Worst Travel Score</th>\n        <th>Best Travel Route</th>\n        <th>Worst Travel Route</th>\n    </tr>\n    ";
@@ -273,6 +371,9 @@ function updateLog() {
     tbdLogTableElement.innerHTML = logHtml;
     summaryHeaderElement.innerText = "Click Here & Scroll to see Complete Log: " + logs.length + " Items";
 }
+/**
+ * Initializer of Genetic algorithm
+ */
 function init() {
     citiesLimitElement.value = numberOfCities.toString();
     initialPopulationLimitElement.value = initialPopulationSize.toString();
